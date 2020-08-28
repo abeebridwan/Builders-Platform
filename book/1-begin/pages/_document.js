@@ -1,4 +1,6 @@
+import React from 'react';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
+import { ServerStyleSheets } from '@material-ui/styles';
 
 class MyDocument extends Document {
   render() {
@@ -43,16 +45,15 @@ class MyDocument extends Document {
                 border-left: 0.25em solid #dfe2e5;
               }
               pre {
-                display: block;
-                overflow-x: auto;
-                padding: 0.5em;
-                background: #FFF;
+                display:block;
+                overflow-x:auto;
+                padding:0.5em;
+                background:#FFF;
+                color: #000;
                 border: 1px solid #ddd;
               }
               code {
                 font-size: 14px;
-                background: #FFF;
-                padding: 3px 5px;
               }
             `}
           </style>
@@ -74,5 +75,51 @@ class MyDocument extends Document {
     );
   }
 }
+
+MyDocument.getInitialProps = async (ctx) => {
+  // Resolution order
+  //
+  // On the server:
+  // 1. app.getInitialProps
+  // 2. page.getInitialProps
+  // 3. document.getInitialProps
+  // 4. app.render
+  // 5. page.render
+  // 6. document.render
+  //
+  // On the server with error:
+  // 1. document.getInitialProps
+  // 2. app.render
+  // 3. page.render
+  // 4. document.render
+  //
+  // On the client
+  // 1. app.getInitialProps
+  // 2. page.getInitialProps
+  // 3. app.render
+  // 4. page.render
+
+  // Render app and page and get the context of the page with collected side effects.
+  const sheets = new ServerStyleSheets();
+  const originalRenderPage = ctx.renderPage;
+
+  ctx.renderPage = () =>
+    originalRenderPage({
+      enhanceApp: (App) => (props) => sheets.collect(<App {...props} />),
+    });
+
+  const initialProps = await Document.getInitialProps(ctx);
+
+  return {
+    ...initialProps,
+    // Styles fragment is rendered after the app and page rendering finish.
+    styles: (
+      <>
+        {initialProps.styles}
+        {sheets.getStyleElement()}
+      </>
+    ),
+  };
+};
 
 export default MyDocument;
