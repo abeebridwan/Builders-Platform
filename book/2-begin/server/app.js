@@ -11,6 +11,11 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
   const server = express();
 
+  server.get('/', (req, res) => {
+    const user = { email: 'team@builderbook.org' };
+    app.render(req, res, '/', { user });
+  });
+
   server.get('*', (req, res) => handle(req, res));
 
   server.listen(port, (err) => {
