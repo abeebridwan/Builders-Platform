@@ -2,9 +2,8 @@
   "name": "3-begin",
   "version": "0.0.1",
   "license": "MIT",
-  "scripts": {
-    "dev": "next",
-    "dev-express": "nodemon server/app.js --watch server",
+  "scripts": {    
+    "dev": "nodemon server/app.js --watch server",
     "build": "next build",
     "start": "next start",
     "lint": "eslint components pages lib server"

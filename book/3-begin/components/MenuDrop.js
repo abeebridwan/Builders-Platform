@@ -1,3 +1,6 @@
+/* eslint-disable react/state-in-constructor */
+/* eslint-disable react/static-property-placement */
+/* eslint-disable react/sort-comp */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
@@ -48,7 +51,7 @@ class MenuDrop extends React.Component {
           onClose={this.handleClose}
         >
           <p />
-          {options.map(option => (
+          {options.map((option) => (
             <div id="wrappingLink" key={option.text}>
               <Link href={option.href} as={option.as || option.href}>
                 <a style={{ padding: '0px 20px' }}>{option.text}</a>
