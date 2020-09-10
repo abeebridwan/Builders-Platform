@@ -3,9 +3,15 @@ import { ThemeProvider } from '@material-ui/styles';
 import App from 'next/app';
 import React from 'react';
 
+import Router from 'next/router';
+import NProgress from 'nprogress';
 import { theme } from '../lib/theme';
 
 import Header from '../components/Header';
+
+Router.onRouteChangeStart = () => NProgress.start();
+Router.onRouteChangeComplete = () => NProgress.done();
+Router.onRouteChangeError = () => NProgress.done();
 
 class MyApp extends App {
   static async getInitialProps({ Component, ctx }) {
