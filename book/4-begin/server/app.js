@@ -25,7 +25,9 @@ const ROOT_URL = `http://localhost:${port}`;
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-app.prepare().then(() => {
+const { insertTemplates } = require('./models/EmailTemplate');
+
+app.prepare().then(async () => {
   const server = express();
 
   const MongoStore = mongoSessionStore(session);
@@ -45,6 +47,8 @@ app.prepare().then(() => {
   };
 
   server.use(session(sess));
+
+  await insertTemplates();
 
   auth({ server, ROOT_URL });
 

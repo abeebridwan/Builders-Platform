@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const _ = require('lodash');
+const logger = require('../logs');
 
 const { Schema } = mongoose;
 
@@ -32,7 +34,6 @@ function insertTemplates() {
         <p>
           In our books, we teach you how to build complete, production-ready web apps from scratch.
         </p>
-
         Kelly & Timur, Team Builder Book
       `,
     },
@@ -51,4 +52,19 @@ function insertTemplates() {
 
 insertTemplates();
 
-module.exports = EmailTemplate;
+async function getEmailTemplate(name, params) {
+  const source = await EmailTemplate.findOne({ name });
+  if (!source) {
+    throw new Error(
+      'No EmailTemplates found. Please check that at least one is generated at server startup, restart your server and try again.',
+    );
+  }
+
+  return {
+    message: _.template(source.message)(params),
+    subject: _.template(source.subject)(params),
+  };
+}
+
+exports.insertTemplates = insertTemplates;
+exports.getEmailTemplate = getEmailTemplate;
