@@ -34,13 +34,13 @@ function insertTemplates() {
         <p>
           In our books, we teach you how to build complete, production-ready web apps from scratch.
         </p>
-        Kelly & Timur, Team Builder Book
+        Abeeb Ridwan Olumide, Builder Book
       `,
     },
   ];
 
   templates.forEach(async (template) => {
-    if ((await EmailTemplate.find({ name: template.name }).count()) > 0) {
+    if ((await EmailTemplate.find({ name: template.name }).countDocuments()) > 0) {
       return;
     }
 
