@@ -1,10 +1,14 @@
+/* eslint-disable react/static-property-placement */
+/* eslint-disable react/prefer-stateless-function */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Head from 'next/head';
 
-import withAuth from '../lib/withAuth';
+import Button from '@material-ui/core/Button';
 
-// eslint-disable-next-line react/prefer-stateless-function
+import withAuth from '../lib/withAuth';
+import notify from '../lib/notifier';
+
 class Index extends React.Component {
   static propTypes = {
     user: PropTypes.shape({
@@ -27,9 +31,13 @@ class Index extends React.Component {
         </Head>
         <p>List of purchased books</p>
         <p>
-          Email:&nbsp;
+          Email:
           {user.email}
         </p>
+
+        <Button variant="contained" onClick={() => notify('success message')}>
+          Click me to test notify()
+        </Button>
       </div>
     );
   }
