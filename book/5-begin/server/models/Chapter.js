@@ -1,5 +1,7 @@
+/* eslint-disable no-use-before-define */
+
 const mongoose = require('mongoose');
-const Book = require('./Book');
+// const Book = require('./Book');
 
 const { Schema } = mongoose;
 
@@ -13,6 +15,9 @@ const mongoSchema = new Schema({
     required: true,
     default: false,
   },
+  githubFilePath: {
+    type: String,
+  },
   title: {
     type: String,
     required: true,
@@ -21,25 +26,23 @@ const mongoSchema = new Schema({
     type: String,
     required: true,
   },
+  excerpt: {
+    type: String,
+    default: '',
+  },
   content: {
     type: String,
     default: '',
     required: true,
   },
-  excerpt: {
+  htmlContent: {
     type: String,
     default: '',
-  },
-  htmlExcerpt: {
-    type: String,
-    default: '',
+    required: true,
   },
   createdAt: {
     type: Date,
     required: true,
-  },
-  githubFilePath: {
-    type: String,
   },
   order: {
     type: Number,
@@ -50,16 +53,16 @@ const mongoSchema = new Schema({
 });
 
 class ChapterClass {
-  static async getBySlug({ bookSlug, chapterSlug, user }) {
-    const book = await Book.getBySlug({ slug: bookSlug, user });
+  static async getBySlug({ bookSlug, chapterSlug }) {
+    const book = await Book.getBySlug({ slug: bookSlug });
     if (!book) {
-      throw new Error('Not found');
+      throw new Error('Book not found');
     }
 
     const chapter = await this.findOne({ bookId: book._id, slug: chapterSlug });
 
     if (!chapter) {
-      throw new Error('Not found');
+      throw new Error('Chapter not found');
     }
 
     const chapterObj = chapter.toObject();
@@ -77,3 +80,5 @@ mongoSchema.loadClass(ChapterClass);
 const Chapter = mongoose.model('Chapter', mongoSchema);
 
 module.exports = Chapter;
+
+const Book = require('./Book');

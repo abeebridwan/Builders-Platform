@@ -1,6 +1,8 @@
+/* eslint-disable no-use-before-define */
+
 const mongoose = require('mongoose');
 const generateSlug = require('../utils/slugify');
-const Chapter = require('./Chapter');
+// const Chapter = require('./Chapter');
 
 const { Schema } = mongoose;
 
@@ -50,16 +52,15 @@ class BookClass {
     book.chapters = (
       await Chapter.find({ bookId: book._id }, 'title slug').sort({ order: 1 })
     ).map((chapter) => chapter.toObject());
+
     return book;
   }
 
   static async add({ name, price, githubRepo }) {
     const slug = await generateSlug(this, name);
-
     if (!slug) {
       throw new Error(`Error with slug generation for name: ${name}`);
     }
-
     return this.create({
       name,
       slug,
@@ -73,22 +74,17 @@ class BookClass {
     const book = await this.findById(id, 'slug name');
 
     if (!book) {
-      throw new Error('Not found');
+      throw new Error('Book is not found by id');
     }
 
     const modifier = { price, githubRepo };
+
     if (name !== book.name) {
       modifier.name = name;
       modifier.slug = await generateSlug(this, name);
     }
 
-    const editedBook = await this.findOneAndUpdate(
-      { _id: id },
-      { $set: modifier },
-      { fields: 'slug', new: true },
-    );
-
-    return editedBook;
+    return this.updateOne({ _id: id }, { $set: modifier });
   }
 }
 
@@ -97,3 +93,5 @@ mongoSchema.loadClass(BookClass);
 const Book = mongoose.model('Book', mongoSchema);
 
 module.exports = Book;
+
+const Chapter = require('./Chapter');
