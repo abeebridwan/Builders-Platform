@@ -4,8 +4,9 @@ const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
 
-const auth = require('./google');
 const api = require('./api');
+
+const auth = require('./google');
 const logger = require('./logs');
 const { insertTemplates } = require('./models/EmailTemplate');
 
@@ -27,6 +28,7 @@ const ROOT_URL = `http://localhost:${port}`;
 
 const URL_MAP = {
   '/login': '/public/login',
+  '/my-books': '/customer/my-books',
 };
 
 const app = next({ dev });
@@ -41,13 +43,13 @@ app.prepare().then(async () => {
     secret: 'HD2w.)q*VqRT4/#NK2M/,E^B)}FED5fWU!dKe[wk',
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
-      ttl: 14 * 24 * 60 * 60, // expires in 14 days
+      ttl: 14 * 24 * 60 * 60, // save session 14 days
     }),
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      maxAge: 14 * 24 * 60 * 60 * 1000, // expires in 14 days
+      maxAge: 14 * 24 * 60 * 60 * 1000,
     },
   };
 
@@ -56,6 +58,7 @@ app.prepare().then(async () => {
   await insertTemplates();
 
   auth({ server, ROOT_URL });
+
   api(server);
 
   server.get('/books/:bookSlug/:chapterSlug', (req, res) => {

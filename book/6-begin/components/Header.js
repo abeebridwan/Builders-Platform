@@ -6,7 +6,6 @@ import Hidden from '@material-ui/core/Hidden';
 import Avatar from '@material-ui/core/Avatar';
 
 import MenuDrop from './MenuDrop';
-
 import { styleToolbar } from './SharedStyles';
 
 const optionsMenu = [
@@ -52,7 +51,7 @@ function Header({ user }) {
                 ) : null}
               </div>
             ) : (
-              <Link href="/public/login" as="/login">
+              <Link href="/public/login" as="./login">
                 <a style={{ margin: '0px 20px 0px auto' }}>Log in</a>
               </Link>
             )}
@@ -65,8 +64,8 @@ function Header({ user }) {
 
 Header.propTypes = {
   user: PropTypes.shape({
-    avatarUrl: PropTypes.string,
     displayName: PropTypes.string,
+    email: PropTypes.string.isRequired,
   }),
 };
 

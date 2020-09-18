@@ -25,7 +25,7 @@ class Index extends React.Component {
           <title>Settings</title>
           <meta name="description" content="List of purchased books." />
         </Head>
-        <p>List of purchased books</p>
+        <p> List of purchased book</p>
         <p>
           Email:&nbsp;
           {user.email}

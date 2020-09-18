@@ -26,7 +26,7 @@ export default (Page, { loginRequired = true, logoutRequired = false } = {}) =>
       }
 
       if (loginRequired && !logoutRequired && !user) {
-        Router.push('/public/login', '/login');
+        Router.push('/login');
         return;
       }
 
@@ -65,4 +65,4 @@ export default (Page, { loginRequired = true, logoutRequired = false } = {}) =>
 
       return <Page {...this.props} />;
     }
-};
+  };
