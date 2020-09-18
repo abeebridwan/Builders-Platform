@@ -61,6 +61,11 @@ app.prepare().then(async () => {
 
   api(server);
 
+  server.get('/books/:bookSlug/:chapterSlug', (req, res) => {
+    const { bookSlug, chapterSlug } = req.params;
+    app.render(req, res, '/public/read-chapter', { bookSlug, chapterSlug });
+  });
+
   server.get('*', (req, res) => {
     const url = URL_MAP[req.path];
     if (url) {
@@ -69,8 +74,6 @@ app.prepare().then(async () => {
       handle(req, res);
     }
   });
-
-  server.get('*', (req, res) => handle(req, res));
 
   server.listen(port, (err) => {
     if (err) throw err;
