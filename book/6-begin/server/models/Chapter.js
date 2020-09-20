@@ -1,7 +1,8 @@
 /* eslint-disable no-use-before-define */
 
 const mongoose = require('mongoose');
-// const Book = require('./Book');
+import generateSlug from '../utils/slugify';
+
 
 const { Schema } = mongoose;
 
@@ -69,6 +70,78 @@ class ChapterClass {
     chapterObj.book = book;
 
     return chapterObj;
+  }
+
+  static async syncContent({ book, data }) {
+    const {
+      title,
+      excerpt = '',
+      isFree = false,
+      seoTitle = '',
+      seoDescription = '',
+    } = data.attributes;
+  
+    const { body, path } = data;
+  
+    const chapter = await this.findOne({
+      bookId: book.id,
+      githubFilePath: path,
+    });
+  
+    let order;
+  
+    if (path === 'introduction.md') {
+      order = 1;
+    } else {
+      order = parseInt(path.match(/[0-9]+/), 10) + 1;
+    }
+  
+    const content = body;
+    const htmlContent = markdownToHtml(content);
+    const htmlExcerpt = markdownToHtml(excerpt);
+    const sections = getSections(content);
+  
+    if (!chapter) {
+      const slug = await generateSlug(this, title, { bookId: book._id });
+  
+      return this.create({
+        bookId: book._id,
+        githubFilePath: path,
+        title,
+        slug,
+        isFree,
+        content,
+        htmlContent,
+        sections,
+        excerpt,
+        htmlExcerpt,
+        order,
+        seoTitle,
+        seoDescription,
+        createdAt: new Date(),
+      });
+    }
+  
+    const modifier = {
+      content,
+      htmlContent,
+      sections,
+      excerpt,
+      htmlExcerpt,
+      isFree,
+      order,
+      seoTitle,
+      seoDescription,
+    };
+  
+    if (title !== chapter.title) {
+      modifier.title = title;
+      modifier.slug = await generateSlug(this, title, {
+        bookId: chapter.bookId,
+      });
+    }
+  
+    return this.updateOne({ _id: chapter._id }, { $set: modifier });
   }
 }
 
