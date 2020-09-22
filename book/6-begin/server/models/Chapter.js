@@ -1,6 +1,6 @@
 /* eslint-disable no-use-before-define */
 const mongoose = require('mongoose');
-import generateSlug from '../utils/slugify';
+const generateSlug = require('../utils/slugify');
 
 const { Schema } = mongoose;
 
