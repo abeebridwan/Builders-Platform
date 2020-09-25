@@ -19,21 +19,36 @@ const optionsMenu = [
   },
 ];
 
+const optionsMenuCustomer = [
+  {
+    text: 'My books',
+    href: '/customer/my-books',
+    as: '/my-books',
+  },
+  {
+    text: 'Log out',
+    href: '/logout',
+  },
+];
+
+const optionsMenuAdmin = [
+  {
+    text: 'Admin',
+    href: '/admin',
+  },
+  {
+    text: 'Log out',
+    href: '/logout',
+  },
+];
+
 function Header({ user }) {
   return (
     <div>
       <Toolbar style={styleToolbar}>
         <Grid container direction="row" justify="space-around" alignItems="center">
-          <Grid item sm={10} xs={9} style={{ textAlign: 'left' }}>
-            {user ? (
-              <div>
-                <Hidden smDown>
-                  <Link href="/">
-                    <a style={{ marginRight: '20px' }}>Settings</a>
-                  </Link>
-                </Hidden>
-              </div>
-            ) : (
+          <Grid item sm={9} xs={8} style={{ textAlign: 'left' }}>
+            {!user ? (
               <Link href="/">
                 <Avatar
                   src="https://storage.googleapis.com/builderbook/logo.svg"
@@ -41,17 +56,39 @@ function Header({ user }) {
                   style={{ margin: '0px auto 0px 20px', cursor: 'pointer' }}
                 />
               </Link>
-            )}
+            ) : null}
           </Grid>
-          <Grid item sm={1} xs={3} style={{ textAlign: 'right' }}>
+          <Grid item sm={2} xs={2} style={{ textAlign: 'right' }}>
+            {user && user.isAdmin && !user.isGithubConnected ? (
+              <Hidden smDown>
+                <a href="/auth/github">
+                  <Button variant="contained" color="primary">
+                    Connect Github
+                  </Button>
+                </a>
+              </Hidden>
+            ) : null}
+          </Grid>
+          <Grid item sm={1} xs={2} style={{ textAlign: 'right' }}>
             {user ? (
-              <div style={{ whiteSpace: ' nowrap' }}>
-                {user.avatarUrl ? (
-                  <MenuDrop options={optionsMenu} src={user.avatarUrl} alt={user.displayName} />
+              <div style={{ whiteSpace: 'nowrap' }}>
+                {!user.isAdmin ? (
+                  <MenuWithAvatar
+                    options={optionsMenuCustomer}
+                    src={user.avatarUrl}
+                    alt={user.displayName}
+                  />
+                ) : null}
+                {user.isAdmin ? (
+                  <MenuWithAvatar
+                    options={optionsMenuAdmin}
+                    src={user.avatarUrl}
+                    alt={user.displayName}
+                  />
                 ) : null}
               </div>
             ) : (
-              <Link href="/public/login" as="./login">
+              <Link href="/public/login" as="/login">
                 <a style={{ margin: '0px 20px 0px auto' }}>Log in</a>
               </Link>
             )}
