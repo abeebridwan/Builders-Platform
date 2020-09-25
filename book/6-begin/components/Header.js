@@ -4,6 +4,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 
 import MenuDrop from './MenuDrop';
 import { styleToolbar } from './SharedStyles';
@@ -73,14 +74,14 @@ function Header({ user }) {
             {user ? (
               <div style={{ whiteSpace: 'nowrap' }}>
                 {!user.isAdmin ? (
-                  <MenuWithAvatar
+                  <MenuDrop
                     options={optionsMenuCustomer}
                     src={user.avatarUrl}
                     alt={user.displayName}
                   />
                 ) : null}
                 {user.isAdmin ? (
-                  <MenuWithAvatar
+                  <MenuDrop
                     options={optionsMenuAdmin}
                     src={user.avatarUrl}
                     alt={user.displayName}

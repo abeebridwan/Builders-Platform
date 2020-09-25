@@ -8,7 +8,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import { getGithubReposApiMethod } from '../../lib/api/admin';
 import { styleTextField } from '../SharedStyles';
-import notify from '../../lib/notify';
+import notify from '../../lib/notifier';
 
 const propTypes = {
   book: PropTypes.shape({

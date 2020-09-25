@@ -7,7 +7,7 @@ import Button from '@material-ui/core/Button';
 
 import { getBookDetailApiMethod, syncBookContentApiMethod } from '../../lib/api/admin';
 import withAuth from '../../lib/withAuth';
-import notify from '../../lib/notify';
+import notify from '../../lib/notifier';
 
 const propTypes = {
   slug: PropTypes.string.isRequired,

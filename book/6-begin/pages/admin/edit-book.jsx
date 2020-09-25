@@ -7,7 +7,7 @@ import React from 'react';
  import EditBook from '../../components/admin/EditBook';
  import { getBookDetailApiMethod, editBookApiMethod } from '../../lib/api/admin';
  import withAuth from '../../lib/withAuth';
- import notify from '../../lib/notify';
+ import notify from '../../lib/notifier';
 
  const propTypes = {
    slug: PropTypes.string.isRequired,
