@@ -67,7 +67,11 @@ function auth({ ROOT_URL, server }) {
       failureRedirect: '/login',
     }),
     (req, res) => {
-      res.redirect('/admin');
+      if (req.user && req.user.isAdmin) {
+        res.redirect('/admin');
+      } else {
+        res.redirect('/my-books');
+      }
     },
   );
 
