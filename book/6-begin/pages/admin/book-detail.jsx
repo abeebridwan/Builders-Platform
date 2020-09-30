@@ -25,6 +25,7 @@ class BookDetail extends React.Component {
       book: null,
       error: null,
     };
+    this.handleSyncContent = this.handleSyncContent.bind(this);  
   }
 
   async componentDidMount() {
@@ -72,7 +73,7 @@ class BookDetail extends React.Component {
           Repo on Github
         </a>
         <p />
-        <Button variant="contained" onClick={this.handleSyncContent()}>
+        <Button variant="contained" onClick={this.handleSyncContent}>
           Sync with Github
         </Button>
         <Link href={`/admin/edit-book?slug=${book.slug}`} as={`/admin/edit-book/${book.slug}`}>

@@ -3,10 +3,12 @@ const session = require('express-session');
 const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser'); 
 
 const api = require('./api');
 
 const auth = require('./google');
+const { setupGithub } = require('./github');
 const logger = require('./logs');
 const { insertTemplates } = require('./models/EmailTemplate');
 const routesWithSlug = require('./routesWithSlug');
@@ -37,6 +39,7 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(async () => {
   const server = express();
+  server.use(bodyParser.json());
 
   const MongoStore = mongoSessionStore(session);
   const sess = {
@@ -59,7 +62,7 @@ app.prepare().then(async () => {
   await insertTemplates();
 
   auth({ server, ROOT_URL });
-
+  setupGithub({ server, ROOT_URL });
   api(server);
 
   routesWithSlug({ server, app });

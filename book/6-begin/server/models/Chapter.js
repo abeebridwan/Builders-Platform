@@ -1,6 +1,9 @@
 /* eslint-disable no-use-before-define */
 const mongoose = require('mongoose');
 const generateSlug = require('../utils/slugify');
+const marked = require("marked");
+const hljs = require('highlight.js/lib/core');
+const he = require('he');
 
 const { Schema } = mongoose;
 

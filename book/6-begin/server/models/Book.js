@@ -85,7 +85,7 @@ class BookClass {
       modifier.slug = await generateSlug(this, name);
     }
 
-    return this.updateOne({ _id: id }, { $set: modifier });
+    return this.findOneAndUpdate({ _id: id }, { $set: modifier }, {new: true});
   }
 
   static async syncContent({ id, user, request }) {
