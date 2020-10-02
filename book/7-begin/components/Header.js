@@ -7,8 +7,18 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 
 import MenuDrop from './MenuDrop';
-
 import { styleToolbar } from './SharedStyles';
+
+const optionsMenu = [
+  {
+    text: 'Got question?',
+    href: 'https://github.com/builderbook/builderbook/issues',
+  },
+  {
+    text: 'Log out',
+    href: '/logout',
+  },
+];
 
 const optionsMenuCustomer = [
   {
@@ -62,7 +72,7 @@ function Header({ user }) {
           </Grid>
           <Grid item sm={1} xs={2} style={{ textAlign: 'right' }}>
             {user ? (
-              <div style={{ whiteSpace: ' nowrap' }}>
+              <div style={{ whiteSpace: 'nowrap' }}>
                 {!user.isAdmin ? (
                   <MenuDrop
                     options={optionsMenuCustomer}
@@ -92,8 +102,8 @@ function Header({ user }) {
 
 Header.propTypes = {
   user: PropTypes.shape({
-    avatarUrl: PropTypes.string,
     displayName: PropTypes.string,
+    email: PropTypes.string.isRequired,
   }),
 };
 

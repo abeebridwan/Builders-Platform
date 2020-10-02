@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
+
 const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
-
 const logger = require('../logs');
 
 const { Schema } = mongoose;
@@ -47,6 +47,14 @@ const mongoSchema = new Schema({
   },
   githubAccessToken: {
     type: String,
+  },
+  githubId: {
+    type: String,
+    unique: true,
+  },
+  githubUsername: {
+    type: String,
+    unique: true,
   },
 });
 

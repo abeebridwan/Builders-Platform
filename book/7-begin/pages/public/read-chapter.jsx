@@ -3,21 +3,21 @@ import PropTypes from 'prop-types';
 import Error from 'next/error';
 import Head from 'next/head';
 
-import { getChapterDetail } from '../../lib/api/public';
+import { getChapterDetailApiMethod } from '../../lib/api/public';
 import withAuth from '../../lib/withAuth';
 
+const propTypes = {
+  chapter: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    htmlContent: PropTypes.string,
+  }),
+};
+
+const defaultProps = {
+  chapter: null,
+};
+
 class ReadChapter extends React.Component {
-  static propTypes = {
-    chapter: PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      htmlContent: PropTypes.string,
-    }),
-  };
-
-  static defaultProps = {
-    chapter: null,
-  };
-
   constructor(props) {
     super(props);
 
@@ -34,12 +34,12 @@ class ReadChapter extends React.Component {
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { chapter } = nextProps;
+  componentDidUpdate(prevProps) {
+    if (prevProps.chapter && prevProps.chapter._id !== this.props.chapter._id) {
+      const { htmlContent } = prevProps.chapter;
 
-    if (chapter && chapter._id !== this.props.chapter._id) {
-      const { htmlContent } = chapter;
-      this.setState({ chapter, htmlContent });
+      // eslint-disable-next-line
+      this.setState({ chapter: prevProps.chapter, htmlContent });
     }
   }
 
@@ -51,7 +51,7 @@ class ReadChapter extends React.Component {
       headers.cookie = req.headers.cookie;
     }
 
-    const chapter = await getChapterDetail({ bookSlug, chapterSlug }, { headers });
+    const chapter = await getChapterDetailApiMethod({ bookSlug, chapterSlug }, { headers });
 
     return { chapter };
   }
@@ -60,6 +60,7 @@ class ReadChapter extends React.Component {
     const { chapter, htmlContent } = this.state;
 
     return (
+      // eslint-disable-next-line react/jsx-filename-extension
       <div>
         <h2>
           Chapter:
@@ -121,5 +122,8 @@ class ReadChapter extends React.Component {
     );
   }
 }
+
+ReadChapter.propTypes = propTypes;
+ReadChapter.defaultProps = defaultProps;
 
 export default withAuth(ReadChapter, { loginRequired: false });
