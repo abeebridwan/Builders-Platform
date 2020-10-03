@@ -43,7 +43,6 @@ const Index = ({ books }) => (
 
 Index.propTypes = propTypes;
 
-
 const propTypes2 = {
   errorMessage: PropTypes.string,
 };
@@ -56,7 +55,7 @@ class IndexWithData extends React.Component {
   static getInitialProps({ query }) {
     return { errorMessage: query.error };
   }
-  
+
   constructor(props) {
     super(props);
 

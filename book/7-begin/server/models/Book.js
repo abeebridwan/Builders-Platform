@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 
 const mongoose = require('mongoose');
@@ -35,10 +36,7 @@ const mongoSchema = new Schema({
 
 class BookClass {
   static async list({ offset = 0, limit = 10 } = {}) {
-    const books = await this.find({})
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit);
+    const books = await this.find({}).sort({ createdAt: -1 }).skip(offset).limit(limit);
     return { books };
   }
 
@@ -85,59 +83,59 @@ class BookClass {
       modifier.slug = await generateSlug(this, name);
     }
 
-    return this.findOneAndUpdate({ _id: id }, { $set: modifier }, {new: true});
+    return this.findOneAndUpdate({ _id: id }, { $set: modifier }, { new: true });
   }
 
   static async syncContent({ id, user, request }) {
     const book = await this.findById(id, 'githubRepo githubLastCommitSha');
-  
+
     if (!book) {
       throw new Error('Book not found');
     }
-  
+
     const repoCommits = await getCommits({
       user,
       repoName: book.githubRepo,
       request,
     });
-  
+
     if (!repoCommits || !repoCommits.data || !repoCommits.data[0]) {
       throw new Error('No change in content!');
     }
-  
+
     const lastCommitSha = repoCommits.data[0].sha;
     if (lastCommitSha === book.githubLastCommitSha) {
       throw new Error('No change in content!');
     }
-  
+
     const mainFolder = await getRepoDetail({
       user,
       repoName: book.githubRepo,
       request,
       path: '',
     });
-  
+
     await Promise.all(
       mainFolder.data.map(async (f) => {
         if (f.type !== 'file') {
           return;
         }
-  
+
         if (f.path !== 'introduction.md' && !/chapter-([0-9]+)\.md/.test(f.path)) {
           return;
         }
-  
+
         const chapter = await getRepoDetail({
           user,
           repoName: book.githubRepo,
           request,
           path: f.path,
         });
-  
+
         const data = frontmatter(Buffer.from(chapter.data.content, 'base64').toString('utf8'));
-  
+
         data.path = f.path;
-  
+
         try {
           await Chapter.syncContent({ book, data });
           console.log('Content is synced', { path: f.path });
@@ -146,7 +144,7 @@ class BookClass {
         }
       }),
     );
-  
+
     return book.updateOne({ githubLastCommitSha: lastCommitSha });
   }
 }

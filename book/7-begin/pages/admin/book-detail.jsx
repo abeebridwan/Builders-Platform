@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import NProgress from 'nprogress';
 import PropTypes from 'prop-types';
@@ -25,7 +26,7 @@ class BookDetail extends React.Component {
       book: null,
       error: null,
     };
-    this.handleSyncContent = this.handleSyncContent.bind(this);  
+    this.handleSyncContent = this.handleSyncContent.bind(this);
   }
 
   async componentDidMount() {

@@ -1,6 +1,7 @@
+/* eslint-disable no-console */
 const { Octokit } = require('@octokit/rest');
 const fetch = require('node-fetch');
-const { oauthAuthorizationUrl } = require("@octokit/oauth-authorization-url");
+const { oauthAuthorizationUrl } = require('@octokit/oauth-authorization-url');
 const _ = require('lodash');
 
 const User = require('./models/User');
@@ -110,7 +111,7 @@ function setupGithub({ server, ROOT_URL }) {
   });
 }
 
-function getAPI({ user, previews = [], request })     {
+function getAPI({ user, previews = [], request }) {
   const github = new Octokit({
     auth: user.githubAccessToken,
     request: { timeout: 10000 },

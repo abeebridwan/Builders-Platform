@@ -3,7 +3,7 @@ const session = require('express-session');
 const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser'); 
+const bodyParser = require('body-parser');
 
 const api = require('./api');
 
@@ -66,7 +66,7 @@ app.prepare().then(async () => {
   api(server);
 
   routesWithSlug({ server, app });
-  
+
   server.get('*', (req, res) => {
     const url = URL_MAP[req.path];
     if (url) {
