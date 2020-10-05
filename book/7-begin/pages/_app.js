@@ -4,7 +4,7 @@ import App from 'next/app';
 import React from 'react';
 import Router from 'next/router';
 import NProgress from 'nprogress';
-import Head from 'next/head'
+import Head from 'next/head';
 
 import { theme } from '../lib/theme';
 
@@ -44,9 +44,11 @@ class MyApp extends App {
       <ThemeProvider theme={theme}>
         {/* ThemeProvider makes the theme available down the React tree thanks to React context. */}
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        <Head><meta name="viewport" content="width=device-width, initial-scale=1.0" /></Head>
+        <Head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        </Head>
         <CssBaseline />
-        <Header {...pageProps} />
+        {pageProps.chapter ? null : <Header {...pageProps} />}
         <Component {...pageProps} />
         <Notifier />
       </ThemeProvider>

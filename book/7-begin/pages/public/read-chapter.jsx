@@ -10,6 +10,7 @@ import throttle from 'lodash/throttle';
 import isEqual from 'lodash/isEqual';
 import { getChapterDetailApiMethod } from '../../lib/api/public';
 import withAuth from '../../lib/withAuth';
+import Header from '../../components/Header';
 
 const styleIcon = {
   opacity: '0.75',
@@ -43,6 +44,7 @@ class ReadChapter extends React.Component {
       showTOC: false,
       chapter,
       htmlContent,
+      hideHeader: false,
     };
   }
 
@@ -55,10 +57,15 @@ class ReadChapter extends React.Component {
   }
 
   onScroll = throttle(() => {
+    this.onScrollActiveSection();
+    this.onScrollHideHeader();
+  }, 500);
+
+  onScrollActiveSection = () => {
     const sectionElms = document.querySelectorAll('span.section-anchor');
     let activeSection;
 
-    let sectionAbove;
+    let aboveSection;
     for (let i = 0; i < sectionElms.length; i += 1) {
       const s = sectionElms[i];
       const b = s.getBoundingClientRect();
@@ -73,7 +80,7 @@ class ReadChapter extends React.Component {
       }
 
       if (anchorBottom > window.innerHeight && i > 0) {
-        if (sectionAbove.bottom <= 0) {
+        if (aboveSection.bottom <= 0) {
           activeSection = {
             hash: sectionElms[i - 1].attributes.getNamedItem('name').value,
           };
@@ -85,13 +92,22 @@ class ReadChapter extends React.Component {
         };
       }
 
-      sectionAbove = b;
+      aboveSection = b;
     }
 
     if (!isEqual(this.state.activeSection, activeSection)) {
       this.setState({ activeSection });
     }
-  }, 500);
+  };
+
+  onScrollHideHeader = () => {
+    const distanceFromTop = document.getElementById('main-content').scrollTop;
+    const hideHeader = distanceFromTop > 500;
+
+    if (this.state.hideHeader !== hideHeader) {
+      this.setState({ hideHeader });
+    }
+  };
 
   componentDidUpdate(prevProps) {
     if (prevProps.chapter && prevProps.chapter._id !== this.props.chapter._id) {
@@ -168,7 +184,7 @@ class ReadChapter extends React.Component {
   }
 
   renderSidebar() {
-    const { showTOC, chapter } = this.state;
+    const { showTOC, chapter, hideHeader } = this.state;
 
     if (!showTOC) {
       return null;
@@ -183,7 +199,8 @@ class ReadChapter extends React.Component {
           textAlign: 'left',
           position: 'absolute',
           bottom: 0,
-          top: '64px',
+          top: hideHeader ? 0 : '64px',
+          transition: 'top 0.5s ease-in',
           left: 0,
           overflowY: 'auto',
           overflowX: 'hidden',
@@ -214,7 +231,9 @@ class ReadChapter extends React.Component {
   }
 
   render() {
-    const { chapter } = this.state;
+    const { user } = this.props;
+
+    const { chapter, showTOC, hideHeader } = this.state;
 
     if (!chapter) {
       return <Error statusCode={404} />;
@@ -233,6 +252,8 @@ class ReadChapter extends React.Component {
           ) : null}
         </Head>
 
+        <Header user={user} hideHeader={hideHeader} />
+
         {this.renderSidebar()}
 
         <div
@@ -243,25 +264,19 @@ class ReadChapter extends React.Component {
             position: 'fixed',
             right: 0,
             bottom: 0,
-            top: '64px',
-            left: '320px',
+            top: hideHeader ? 0 : '64px',
+            transition: 'top 0.5s ease-in',
+            left: '400px',
             overflowY: 'auto',
             overflowX: 'hidden',
           }}
         >
-          <div
-            style={{
-              position: 'fixed',
-              top: '80px',
-              left: '15px',
-            }}
-          />
           {this.renderMainContent()}
         </div>
         <div
           style={{
             position: 'fixed',
-            // top: hideHeader ? '20px' : '80px',
+            top: hideHeader ? '20px' : '80px',
             transition: 'top 0.5s ease-in',
             left: '15px',
           }}

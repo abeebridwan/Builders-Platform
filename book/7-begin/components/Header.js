@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -9,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import MenuDrop from './MenuDrop';
 import { styleToolbar } from './SharedStyles';
 
+// eslint-disable-next-line no-unused-vars
 const optionsMenu = [
   {
     text: 'Got question?',
@@ -43,9 +45,17 @@ const optionsMenuAdmin = [
   },
 ];
 
-function Header({ user }) {
+function Header({ user, hideHeader }) {
   return (
-    <div>
+    <div
+      style={{
+        overflow: 'hidden',
+        position: 'relative',
+        display: 'block',
+        top: hideHeader ? '-64px' : '0px',
+        transition: 'top 0.5s ease-in',
+      }}
+    >
       <Toolbar style={styleToolbar}>
         <Grid container direction="row" justify="space-around" alignItems="center">
           <Grid item sm={9} xs={8} style={{ textAlign: 'left' }}>
@@ -102,13 +112,15 @@ function Header({ user }) {
 
 Header.propTypes = {
   user: PropTypes.shape({
+    avatarUrl: PropTypes.string,
     displayName: PropTypes.string,
-    email: PropTypes.string.isRequired,
   }),
+  hideHeader: PropTypes.bool,
 };
 
 Header.defaultProps = {
   user: null,
+  hideHeader: false,
 };
 
 export default Header;
