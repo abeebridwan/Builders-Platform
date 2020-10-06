@@ -36,7 +36,7 @@ function insertTemplates() {
           See list of available books here.
         </p>
 
-        Kelly & Timur,
+        Abeeb Ridwan Olumide,
         Team BB
       `,
     },

@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-use-before-define */
 const mongoose = require('mongoose');
 const marked = require('marked');
