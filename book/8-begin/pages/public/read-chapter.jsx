@@ -1,14 +1,14 @@
+/* eslint-disable no-console */
+/* eslint-disable react/sort-comp */
+/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Error from 'next/error';
 import Head from 'next/head';
 import throttle from 'lodash/throttle';
-
 import Link from 'next/link';
-
 import Header from '../../components/Header';
-
-import { getChapterDetail } from '../../lib/api/public';
+import { getChapterDetailApiMethod } from '../../lib/api/public';
 import withAuth from '../../lib/withAuth';
 
 const styleIcon = {
@@ -17,25 +17,23 @@ const styleIcon = {
   cursor: 'pointer',
 };
 
+const propTypes = {
+  chapter: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    htmlContent: PropTypes.string,
+    htmlExcerpt: PropTypes.string,
+  }),
+  user: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+  }),
+};
+
+const defaultProps = {
+  chapter: null,
+  user: null,
+};
+
 class ReadChapter extends React.Component {
-  static propTypes = {
-    chapter: PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      isPurchased: PropTypes.bool,
-      isFree: PropTypes.bool.isRequired,
-      htmlContent: PropTypes.string,
-      htmlExcerpt: PropTypes.string,
-    }),
-    user: PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-    }),
-  };
-
-  static defaultProps = {
-    chapter: null,
-    user: null,
-  };
-
   constructor(props, ...args) {
     super(props, ...args);
 
@@ -65,13 +63,14 @@ class ReadChapter extends React.Component {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { chapter } = nextProps;
-
-    if (chapter && chapter._id !== this.props.chapter._id) {
+  componentDidUpdate(prevProps) {
+    if (prevProps.chapter && prevProps.chapter._id !== this.props.chapter._id) {
       document.getElementById('chapter-content').scrollIntoView();
-      const { htmlContent } = chapter;
-      this.setState({ chapter, htmlContent });
+
+      const { htmlContent } = this.props.chapter;
+
+      // eslint-disable-next-line
+      this.setState({ chapter: this.props.chapter, htmlContent });
     }
   }
 
@@ -132,25 +131,26 @@ class ReadChapter extends React.Component {
     }
   };
 
-  static async getInitialProps({ req, query }) {
-    const { bookSlug, chapterSlug } = query;
+  static async getInitialProps(ctx) {
+    const { bookSlug, chapterSlug } = ctx.query;
+    const { req } = ctx;
 
     const headers = {};
     if (req && req.headers && req.headers.cookie) {
       headers.cookie = req.headers.cookie;
     }
 
-    const chapter = await getChapterDetail({ bookSlug, chapterSlug }, { headers });
+    const chapter = await getChapterDetailApiMethod({ bookSlug, chapterSlug }, { headers });
 
     return { chapter };
   }
 
   toggleChapterList = () => {
-    this.setState({ showTOC: !this.state.showTOC });
+    this.setState((prevState) => ({ showTOC: !prevState.showTOC }));
   };
 
   closeTocWhenMobile = () => {
-    this.setState({ showTOC: !this.state.isMobile });
+    this.setState((prevState) => ({ showTOC: !prevState.isMobile }));
   };
 
   renderMainContent() {
@@ -272,7 +272,7 @@ class ReadChapter extends React.Component {
     }
 
     return (
-      <div style={{ overflowScrolling: 'touch', WebkitOverflowScrolling: 'touch' }}>
+      <div>
         <Head>
           <title>
             {chapter.title === 'Introduction'
@@ -328,5 +328,8 @@ class ReadChapter extends React.Component {
     );
   }
 }
+
+ReadChapter.propTypes = propTypes;
+ReadChapter.defaultProps = defaultProps;
 
 export default withAuth(ReadChapter, { loginRequired: false });

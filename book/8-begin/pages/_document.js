@@ -5,15 +5,9 @@ import { ServerStyleSheets } from '@material-ui/styles';
 class MyDocument extends Document {
   render() {
     return (
-      <Html
-        lang="en"
-        style={{
-          height: '100%',
-        }}
-      >
+      <Html lang="en">
         <Head>
-          <meta charSet="utf-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta charSet="utf-8" />          
           <meta name="google" content="notranslate" />
           <meta name="theme-color" content="#1976D2" />
 
@@ -71,7 +65,6 @@ class MyDocument extends Document {
             fontWeight: '300',
             lineHeight: '1.5em',
             backgroundColor: '#F7F9FC',
-            minHeight: '100%',
           }}
         >
           <Main />

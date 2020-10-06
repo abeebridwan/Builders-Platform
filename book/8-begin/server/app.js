@@ -3,11 +3,12 @@ const session = require('express-session');
 const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
+const api = require('./api');
 
 const auth = require('./google');
 const { setupGithub } = require('./github');
-const api = require('./api');
-
 const logger = require('./logs');
 const { insertTemplates } = require('./models/EmailTemplate');
 const routesWithSlug = require('./routesWithSlug');
@@ -38,8 +39,7 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(async () => {
   const server = express();
-
-  server.use(express.json());
+  server.use(bodyParser.json());
 
   const MongoStore = mongoSessionStore(session);
   const sess = {
@@ -47,13 +47,13 @@ app.prepare().then(async () => {
     secret: 'HD2w.)q*VqRT4/#NK2M/,E^B)}FED5fWU!dKe[wk',
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
-      ttl: 14 * 24 * 60 * 60, // expires in 14 days
+      ttl: 14 * 24 * 60 * 60, // save session 14 days
     }),
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      maxAge: 14 * 24 * 60 * 60 * 1000, // expires in 14 days
+      maxAge: 14 * 24 * 60 * 60 * 1000,
     },
   };
 
@@ -62,8 +62,9 @@ app.prepare().then(async () => {
   await insertTemplates();
 
   auth({ server, ROOT_URL });
-  setupGithub({ server });
+  setupGithub({ server, ROOT_URL });
   api(server);
+
   routesWithSlug({ server, app });
 
   server.get('*', (req, res) => {

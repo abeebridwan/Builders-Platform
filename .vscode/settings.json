@@ -14,7 +14,7 @@
   },
   "eslint.workingDirectories": [
     {
-      "directory": "./book/7-begin/",
+      "directory": "./book/8-begin/",
       "changeProcessCWD": true
     },
   ],

@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
+
 const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
-
 const logger = require('../logs');
 
 const { Schema } = mongoose;
@@ -48,6 +48,14 @@ const mongoSchema = new Schema({
   githubAccessToken: {
     type: String,
   },
+  githubId: {
+    type: String,
+    unique: true,
+  },
+  githubUsername: {
+    type: String,
+    unique: true,
+  },
 });
 
 class UserClass {
@@ -79,6 +87,7 @@ class UserClass {
     }
 
     const slug = await generateSlug(this, displayName);
+    const userCount = await this.find().countDocuments();
 
     const newUser = await this.create({
       createdAt: new Date(),
@@ -88,6 +97,7 @@ class UserClass {
       displayName,
       avatarUrl,
       slug,
+      isAdmin: userCount === 0,
     });
 
     const template = await getEmailTemplate('welcome', {
@@ -96,7 +106,7 @@ class UserClass {
 
     try {
       await sendEmail({
-        from: `Kelly from Builder Book <${process.env.EMAIL_SUPPORT_FROM_ADDRESS}>`,
+        from: `Abeeb Ridwan from Builder Book <${process.env.EMAIL_SUPPORT_FROM_ADDRESS}>`,
         to: [email],
         subject: template.subject,
         body: template.message,

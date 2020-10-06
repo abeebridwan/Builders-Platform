@@ -29,13 +29,14 @@ function insertTemplates() {
       subject: 'Welcome to builderbook.org',
       message: `<%= userName %>,
         <p>
-          At Builder Book, we are excited to help you build useful, production-ready web apps from scratch.
+          At Builder Book, we are excited to help you build useful, 
+          production-ready web apps from scratch.
         </p>
         <p>
           See list of available books here.
         </p>
 
-        Kelly & Timur,
+        Abeeb Ridwan Olumide,
         Team BB
       `,
     },

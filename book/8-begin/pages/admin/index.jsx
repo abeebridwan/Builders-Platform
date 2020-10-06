@@ -7,9 +7,19 @@ import Button from '@material-ui/core/Button';
 import notify from '../../lib/notifier';
 
 import withAuth from '../../lib/withAuth';
-import { getBookList } from '../../lib/api/admin';
+import { getBookListApiMethod } from '../../lib/api/admin';
+
+const propTypes = {
+  books: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      slug: PropTypes.string.isRequired,
+    }),
+  ).isRequired,
+};
 
 const Index = ({ books }) => (
+  // eslint-disable-next-line react/jsx-filename-extension
   <div style={{ padding: '10px 45px' }}>
     <div>
       <h2>Books</h2>
@@ -31,23 +41,36 @@ const Index = ({ books }) => (
   </div>
 );
 
-Index.propTypes = {
-  books: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      slug: PropTypes.string.isRequired,
-    }),
-  ).isRequired,
+Index.propTypes = propTypes;
+
+const propTypes2 = {
+  errorMessage: PropTypes.string,
+};
+
+const defaultProps2 = {
+  errorMessage: null,
 };
 
 class IndexWithData extends React.Component {
-  state = {
-    books: [],
-  };
+  static getInitialProps({ query }) {
+    return { errorMessage: query.error };
+  }
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      books: [],
+    };
+  }
 
   async componentDidMount() {
+    if (this.props.errorMessage) {
+      notify(this.props.errorMessage);
+    }
+
     try {
-      const { books } = await getBookList();
+      const { books } = await getBookListApiMethod();
       this.setState({ books }); // eslint-disable-line
     } catch (err) {
       notify(err);
@@ -58,5 +81,8 @@ class IndexWithData extends React.Component {
     return <Index {...this.state} />;
   }
 }
+
+IndexWithData.propTypes = propTypes2;
+IndexWithData.defaultProps = defaultProps2;
 
 export default withAuth(IndexWithData, { adminRequired: true });

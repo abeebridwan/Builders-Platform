@@ -1,11 +1,10 @@
+/* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 
 const mongoose = require('mongoose');
 const frontmatter = require('front-matter');
 const generateSlug = require('../utils/slugify');
-// const Chapter = require('./Chapter');
-const { getCommits, getContent } = require('../github');
-const logger = require('../logs');
+const { getCommits, getRepoDetail } = require('../github');
 
 const { Schema } = mongoose;
 
@@ -37,10 +36,7 @@ const mongoSchema = new Schema({
 
 class BookClass {
   static async list({ offset = 0, limit = 10 } = {}) {
-    const books = await this.find({})
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit);
+    const books = await this.find({}).sort({ createdAt: -1 }).skip(offset).limit(limit);
     return { books };
   }
 
@@ -52,9 +48,10 @@ class BookClass {
 
     const book = bookDoc.toObject();
 
-    book.chapters = (await Chapter.find({ bookId: book._id }, 'title slug').sort({ order: 1 })).map(
-      (chapter) => chapter.toObject(),
-    );
+    book.chapters = (
+      await Chapter.find({ bookId: book._id }, 'title slug').sort({ order: 1 })
+    ).map((chapter) => chapter.toObject());
+
     return book;
   }
 
@@ -86,40 +83,35 @@ class BookClass {
       modifier.slug = await generateSlug(this, name);
     }
 
-    const editedBook = await this.findOneAndUpdate(
-      { _id: id },
-      { $set: modifier },
-      { fields: 'slug', new: true },
-    );
-
-    return editedBook;
+    return this.findOneAndUpdate({ _id: id }, { $set: modifier }, { new: true });
   }
 
-  static async syncContent({ id, githubAccessToken }) {
+  static async syncContent({ id, user, request }) {
     const book = await this.findById(id, 'githubRepo githubLastCommitSha');
 
     if (!book) {
       throw new Error('Book not found');
     }
 
-    const lastCommit = await getCommits({
-      accessToken: githubAccessToken,
+    const repoCommits = await getCommits({
+      user,
       repoName: book.githubRepo,
-      limit: 1,
+      request,
     });
 
-    if (!lastCommit || !lastCommit.data || !lastCommit.data[0]) {
+    if (!repoCommits || !repoCommits.data || !repoCommits.data[0]) {
       throw new Error('No change in content!');
     }
 
-    const lastCommitSha = lastCommit.data[0].sha;
+    const lastCommitSha = repoCommits.data[0].sha;
     if (lastCommitSha === book.githubLastCommitSha) {
       throw new Error('No change in content!');
     }
 
-    const mainFolder = await getContent({
-      accessToken: githubAccessToken,
+    const mainFolder = await getRepoDetail({
+      user,
       repoName: book.githubRepo,
+      request,
       path: '',
     });
 
@@ -133,9 +125,10 @@ class BookClass {
           return;
         }
 
-        const chapter = await getContent({
-          accessToken: githubAccessToken,
+        const chapter = await getRepoDetail({
+          user,
           repoName: book.githubRepo,
+          request,
           path: f.path,
         });
 
@@ -145,9 +138,9 @@ class BookClass {
 
         try {
           await Chapter.syncContent({ book, data });
-          logger.info('Content is synced', { path: f.path });
+          console.log('Content is synced', { path: f.path });
         } catch (error) {
-          logger.error('Content sync has error', { path: f.path, error });
+          console.error('Content sync has error', { path: f.path, error });
         }
       }),
     );

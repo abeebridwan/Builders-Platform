@@ -1,14 +1,26 @@
+/* eslint-disable react/prop-types */
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Toolbar from '@material-ui/core/Toolbar';
 import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
-import Button from '@material-ui/core/Button';
 import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
 
 import MenuDrop from './MenuDrop';
+import { styleToolbar } from './SharedStyles';
 
-import { styleToolbar, styleRaisedButton } from './SharedStyles';
+// eslint-disable-next-line no-unused-vars
+const optionsMenu = [
+  {
+    text: 'Got question?',
+    href: 'https://github.com/builderbook/builderbook/issues',
+  },
+  {
+    text: 'Log out',
+    href: '/logout',
+  },
+];
 
 const optionsMenuCustomer = [
   {
@@ -46,7 +58,7 @@ function Header({ user, hideHeader }) {
     >
       <Toolbar style={styleToolbar}>
         <Grid container direction="row" justify="space-around" alignItems="center">
-          <Grid item sm={8} xs={7} style={{ textAlign: 'left' }}>
+          <Grid item sm={9} xs={8} style={{ textAlign: 'left' }}>
             {!user ? (
               <Link href="/">
                 <Avatar
@@ -61,16 +73,16 @@ function Header({ user, hideHeader }) {
             {user && user.isAdmin && !user.isGithubConnected ? (
               <Hidden smDown>
                 <a href="/auth/github">
-                  <Button variant="contained" color="primary" style={styleRaisedButton}>
+                  <Button variant="contained" color="primary">
                     Connect Github
                   </Button>
                 </a>
               </Hidden>
             ) : null}
           </Grid>
-          <Grid item sm={2} xs={3} style={{ textAlign: 'right' }}>
+          <Grid item sm={1} xs={2} style={{ textAlign: 'right' }}>
             {user ? (
-              <div style={{ whiteSpace: ' nowrap' }}>
+              <div style={{ whiteSpace: 'nowrap' }}>
                 {!user.isAdmin ? (
                   <MenuDrop
                     options={optionsMenuCustomer}
