@@ -3,6 +3,7 @@ const session = require('express-session');
 const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const bodyParser = require('body-parser');
 
 const api = require('./api');
