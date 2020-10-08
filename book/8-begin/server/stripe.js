@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const Stripe = require('stripe');
 const lodash = require('lodash');
 
