@@ -5,6 +5,7 @@ const next = require('next');
 const mongoose = require('mongoose');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bodyParser = require('body-parser');
+const stripe = require('./stripe');
 
 const api = require('./api');
 
@@ -64,6 +65,7 @@ app.prepare().then(async () => {
 
   auth({ server, ROOT_URL });
   setupGithub({ server, ROOT_URL });
+  stripe.stripeCheckoutCallback({ server });
   api(server);
 
   routesWithSlug({ server, app });

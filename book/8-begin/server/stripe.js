@@ -5,24 +5,23 @@ const lodash = require('lodash');
 const Book = require('./models/Book');
 const User = require('./models/User');
 
-const dev = process.env.NODE_ENV !== 'production';
-const API_KEY = dev ? process.env.STRIPE_TEST_SECRETKEY : process.env.STRIPE_LIVE_SECRETKEY;
+// const dev = process.env.NODE_ENV !== 'production';
+// const API_KEY = dev ? process.env.STRIPE_TEST_SECRETKEY : process.env.STRIPE_LIVE_SECRETKEY;
 
 const port = process.env.PORT || 8000;
 const ROOT_URL = `http://localhost:${port}`;
 
-const stripeInstance = new Stripe(API_KEY, { apiVersion: '2020-03-02' });
+const stripeInstance = new Stripe(
+  'sk_test_51HhE4SCcxenYW9mzSJr8XAx1W6xaJAGULAoFez57hW24wPZyG1pMWxdLD2Kt7FZZqTTG75yNvMU2uVaq2bCWHOBA00uzkNxfFp',
+  { apiVersion: '2020-08-27' },
+);
 
 function getBookPriceId(bookSlug) {
   let priceId;
   if (bookSlug === 'demo-book') {
-    priceId = dev
-      ? process.env.STRIPE_TEST_DEMO_BOOK_PRICE_ID
-      : process.env.STRIPE_LIVE_DEMO_BOOK_PRICE_ID;
+    priceId = 'price_1IVHIxCcxenYW9mzOkPtOjxZ';
   } else if (bookSlug === 'second-book') {
-    priceId = dev
-      ? process.env.STRIPE_TEST_SECOND_BOOK_PRICE_ID
-      : process.env.STRIPE_LIVE_SECOND_BOOK_PRICE_ID;
+    priceId = 'price_1IVHfwCcxenYW9mzXhBAXLC3';
   } else {
     throw new Error('Wrong book');
   }

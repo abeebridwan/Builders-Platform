@@ -14,12 +14,12 @@ const styleBuyButton = {
   font: '14px Roboto',
 };
 
-const dev = process.env.NODE_ENV !== 'production';
+// const dev = process.env.NODE_ENV !== 'production';
 const port = process.env.PORT || 8000;
 const ROOT_URL = `http://localhost:${port}`;
 
 const stripePromise = loadStripe(
-  dev ? process.env.Stripe_Test_PublishableKey : process.env.Stripe_Live_PublishableKey,
+  'pk_test_51HhE4SCcxenYW9mzEktFKyaBZXdZDpcHOsjSmEXUXDsGYkWxFG4AEn6rw69qme2ih1LcQvuBIkBH2VLZYiN1gWmg00dGTEfUHc',
 );
 
 class BuyButton extends React.Component {

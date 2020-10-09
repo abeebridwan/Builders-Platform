@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-console */
 /* eslint-disable react/sort-comp */
 /* eslint-disable react/jsx-filename-extension */
@@ -10,6 +11,8 @@ import Link from 'next/link';
 import Header from '../../components/Header';
 import { getChapterDetailApiMethod } from '../../lib/api/public';
 import withAuth from '../../lib/withAuth';
+import BuyButton from '../../components/customer/BuyButton';
+import notify from '../../lib/notifier';
 
 const styleIcon = {
   opacity: '0.75',
@@ -81,6 +84,14 @@ class ReadChapter extends React.Component {
     if (this.state.isMobile !== isMobile) {
       this.setState({ isMobile }); // eslint-disable-line
     }
+
+    if (this.props.checkoutCanceled) {
+      notify('Checkout canceled.');
+    }
+
+    if (this.props.error) {
+      notify(this.props.error);
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -92,7 +103,8 @@ class ReadChapter extends React.Component {
       } else {
         htmlContent = prevProps.chapter.htmlExcerpt;
       }
-
+      console.log({ prevProps: prevProps.chapter });
+      console.log({ Newprops: this.props.chapter });
       // eslint-disable-next-line
       this.setState({ chapter: prevProps.chapter, htmlContent });
     }
@@ -152,7 +164,7 @@ class ReadChapter extends React.Component {
   };
 
   static async getInitialProps(ctx) {
-    const { bookSlug, chapterSlug } = ctx.query;
+    const { bookSlug, chapterSlug, buy, checkout_canceled, error } = ctx.query;
     const { req } = ctx;
 
     const headers = {};
@@ -162,7 +174,9 @@ class ReadChapter extends React.Component {
 
     const chapter = await getChapterDetailApiMethod({ bookSlug, chapterSlug }, { headers });
 
-    return { chapter };
+    const redirectToCheckout = !!buy;
+
+    return { chapter, redirectToCheckout, checkoutCanceled: !!checkout_canceled, error };
   }
 
   toggleChapterList = () => {
@@ -175,6 +189,8 @@ class ReadChapter extends React.Component {
 
   renderMainContent() {
     const { chapter, htmlContent, showTOC, isMobile } = this.state;
+    const { book } = chapter;
+    const { user, redirectToCheckout } = this.props;
 
     let padding = '20px 20%';
     if (!isMobile && showTOC) {
@@ -189,10 +205,16 @@ class ReadChapter extends React.Component {
           {chapter.order > 1 ? `Chapter ${chapter.order - 1}: ` : null}
           {chapter.title}
         </h2>
+        {!chapter.isPurchased && !chapter.isFree ? (
+          <BuyButton user={user} book={book} redirectToCheckout={redirectToCheckout} />
+        ) : null}
         <div
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
+        {!chapter.isPurchased && !chapter.isFree ? (
+          <BuyButton user={user} book={book} redirectToCheckout={redirectToCheckout} />
+        ) : null}
       </div>
     );
   }

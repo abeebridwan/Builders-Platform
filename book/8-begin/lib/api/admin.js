@@ -7,7 +7,7 @@ export const getBookListApiMethod = () =>
     method: 'GET',
   });
 
-  export const addBookApiMethod = ({ name, price, githubRepo }) =>
+export const addBookApiMethod = ({ name, price, githubRepo }) =>
   sendRequest(`${BASE_PATH}/books/add`, {
     body: JSON.stringify({ name, price, githubRepo }),
   });
@@ -27,7 +27,10 @@ export const getBookDetailApiMethod = ({ slug }) =>
     method: 'GET',
   });
 
-{/* github related */}
+// eslint-disable-next-line no-lone-blocks
+{
+  /* github related */
+}
 
 export const getGithubReposApiMethod = () =>
   sendRequest(`${BASE_PATH}/github/repos`, {
