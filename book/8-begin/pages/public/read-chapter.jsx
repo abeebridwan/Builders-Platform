@@ -40,8 +40,10 @@ class ReadChapter extends React.Component {
     const { chapter } = props;
 
     let htmlContent = '';
-    if (chapter) {
+    if (chapter && (chapter.isPurchased || chapter.isFree)) {
       htmlContent = chapter.htmlContent;
+    } else {
+      htmlContent = chapter.htmlExcerpt;
     }
 
     this.state = {
@@ -51,6 +53,24 @@ class ReadChapter extends React.Component {
       hideHeader: false,
       isMobile: false,
     };
+  }
+
+  static getDerivedStateFromProps(props) {
+    const { chapter } = props;
+
+    if (chapter) {
+      let htmlContent;
+
+      if (chapter.isPurchased || chapter.isFree) {
+        htmlContent = chapter.htmlContent;
+      } else {
+        htmlContent = chapter.htmlExcerpt;
+      }
+
+      return { chapter, htmlContent };
+    }
+
+    return null;
   }
 
   componentDidMount() {
@@ -66,16 +86,16 @@ class ReadChapter extends React.Component {
   componentDidUpdate(prevProps) {
     if (prevProps.chapter && prevProps.chapter._id !== this.props.chapter._id) {
       document.getElementById('chapter-content').scrollIntoView();
-
-      const { htmlContent } = this.props.chapter;
+      let htmlContent = '';
+      if (prevProps.chapter && (prevProps.chapter.isPurchased || prevProps.chapter.isFree)) {
+        htmlContent = prevProps.chapter.htmlContent;
+      } else {
+        htmlContent = prevProps.chapter.htmlExcerpt;
+      }
 
       // eslint-disable-next-line
-      this.setState({ chapter: this.props.chapter, htmlContent });
+      this.setState({ chapter: prevProps.chapter, htmlContent });
     }
-  }
-
-  componentWillUnmount() {
-    document.getElementById('main-content').removeEventListener('scroll', this.onScroll);
   }
 
   onScroll = throttle(() => {
