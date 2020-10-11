@@ -8,6 +8,7 @@ import Error from 'next/error';
 import Head from 'next/head';
 import throttle from 'lodash/throttle';
 import Link from 'next/link';
+import { withRouter } from 'next/router';
 import Header from '../../components/Header';
 import { getChapterDetailApiMethod } from '../../lib/api/public';
 import withAuth from '../../lib/withAuth';
@@ -29,6 +30,9 @@ const propTypes = {
   user: PropTypes.shape({
     _id: PropTypes.string.isRequired,
   }),
+  router: PropTypes.shape({
+    asPath: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 const defaultProps = {
@@ -56,6 +60,8 @@ class ReadChapter extends React.Component {
       hideHeader: false,
       isMobile: false,
     };
+    console.log({ props: this.props });
+    console.log({ state: this.state });
   }
 
   static getDerivedStateFromProps(props) {
@@ -300,7 +306,7 @@ class ReadChapter extends React.Component {
   }
 
   render() {
-    const { user } = this.props;
+    const { user, router } = this.props;
 
     const { chapter, showTOC, hideHeader, isMobile } = this.state;
 
@@ -326,7 +332,7 @@ class ReadChapter extends React.Component {
           ) : null}
         </Head>
 
-        <Header user={user} hideHeader={hideHeader} />
+        <Header user={user} hideHeader={hideHeader} redirectUrl={router.asPath} />
 
         {this.renderSidebar()}
 
@@ -374,4 +380,6 @@ class ReadChapter extends React.Component {
 ReadChapter.propTypes = propTypes;
 ReadChapter.defaultProps = defaultProps;
 
-export default withAuth(ReadChapter, { loginRequired: false });
+export default withAuth(withRouter(ReadChapter), {
+  loginRequired: false,
+});

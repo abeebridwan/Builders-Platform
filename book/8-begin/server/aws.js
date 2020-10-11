@@ -2,9 +2,9 @@ const aws = require('aws-sdk');
 
 function sendEmail(options) {
   aws.config.update({
-    region: process.env.Amazon_region,
-    accessKeyId: process.env.Amazon_accessKeyId,
-    secretAccessKey: process.env.Amazon_secretAccessKey,
+    region: 'us-east-1',
+    accessKeyId: 'AKIAUAIRNUPRWEQ6CP42',
+    secretAccessKey: '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',
   });
 
   const ses = new aws.SES({ apiVersion: 'latest' });

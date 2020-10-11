@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
+const { gmail } = require('googleapis/build/src/apis/gmail');
 const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
@@ -106,7 +107,7 @@ class UserClass {
 
     try {
       await sendEmail({
-        from: `Abeeb Ridwan from Builder Book <${process.env.EMAIL_SUPPORT_FROM_ADDRESS}>`,
+        from: `Abeeb Ridwan from Builder Book <${'igortunde100@gmailcom'}>`,
         to: [email],
         subject: template.subject,
         body: template.message,

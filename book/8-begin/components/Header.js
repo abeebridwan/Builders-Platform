@@ -10,18 +10,6 @@ import Button from '@material-ui/core/Button';
 import MenuDrop from './MenuDrop';
 import { styleToolbar } from './SharedStyles';
 
-// eslint-disable-next-line no-unused-vars
-const optionsMenu = [
-  {
-    text: 'Got question?',
-    href: 'https://github.com/builderbook/builderbook/issues',
-  },
-  {
-    text: 'Log out',
-    href: '/logout',
-  },
-];
-
 const optionsMenuCustomer = [
   {
     text: 'My books',
@@ -45,7 +33,7 @@ const optionsMenuAdmin = [
   },
 ];
 
-function Header({ user, hideHeader }) {
+function Header({ user, hideHeader, redirectUrl }) {
   return (
     <div
       style={{
@@ -99,7 +87,16 @@ function Header({ user, hideHeader }) {
                 ) : null}
               </div>
             ) : (
-              <Link href="/public/login" as="/login">
+              <Link
+                href={{
+                  pathname: '/public/login',
+                  query: { redirectUrl },
+                }}
+                as={{
+                  pathname: '/login',
+                  query: { redirectUrl },
+                }}
+              >
                 <a style={{ margin: '0px 20px 0px auto' }}>Log in</a>
               </Link>
             )}
@@ -116,11 +113,13 @@ Header.propTypes = {
     displayName: PropTypes.string,
   }),
   hideHeader: PropTypes.bool,
+  redirectUrl: PropTypes.string,
 };
 
 Header.defaultProps = {
   user: null,
   hideHeader: false,
+  redirectUrl: '',
 };
 
 export default Header;
