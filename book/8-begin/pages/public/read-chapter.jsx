@@ -109,8 +109,7 @@ class ReadChapter extends React.Component {
       } else {
         htmlContent = prevProps.chapter.htmlExcerpt;
       }
-      console.log({ prevProps: prevProps.chapter });
-      console.log({ Newprops: this.props.chapter });
+
       // eslint-disable-next-line
       this.setState({ chapter: prevProps.chapter, htmlContent });
     }

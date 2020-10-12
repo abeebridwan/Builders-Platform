@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
@@ -5,6 +6,8 @@ const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
 const logger = require('../logs');
+
+const { addToMailchimp } = require('../mailchimp');
 
 const { Schema } = mongoose;
 
@@ -122,6 +125,12 @@ class UserClass {
       });
     } catch (err) {
       logger.error('Email sending error:', err);
+    }
+
+    try {
+      await addToMailchimp({ email, listName: 'signedup' });
+    } catch (error) {
+      console.error('Mailchimp error:', error);
     }
 
     return _.pick(newUser, UserClass.publicFields());
