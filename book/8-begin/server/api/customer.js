@@ -1,10 +1,18 @@
-/* eslint-disable no-console */
 const express = require('express');
 const Book = require('../models/Book');
-const stripe = require('../stripe.js');
 const Purchase = require('../models/Purchase');
+const { createSession } = require('../stripe');
 
 const router = express.Router();
+
+router.use((req, res, next) => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  next();
+});
 
 router.post('/stripe/fetch-checkout-session', async (req, res) => {
   try {
@@ -19,10 +27,10 @@ router.post('/stripe/fetch-checkout-session', async (req, res) => {
     const isPurchased =
       (await Purchase.find({ userId: req.user._id, bookId: book._id }).countDocuments()) > 0;
     if (isPurchased) {
-      throw new Error('Already bought this book');
+      throw new Error('You already bought this book.');
     }
 
-    const session = await stripe.createSession({
+    const session = await createSession({
       userId: req.user._id.toString(),
       userEmail: req.user.email,
       bookId,
@@ -40,7 +48,7 @@ router.post('/stripe/fetch-checkout-session', async (req, res) => {
 router.get('/my-books', async (req, res) => {
   try {
     const { purchasedBookIds = [] } = req.user;
-    console.log(purchasedBookIds);
+
     const { purchasedBooks } = await Book.getPurchasedBooks({ purchasedBookIds });
 
     res.json({ purchasedBooks });

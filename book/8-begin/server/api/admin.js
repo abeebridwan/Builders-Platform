@@ -1,5 +1,3 @@
-/* eslint-disable no-lone-blocks */
-/* eslint-disable no-console */
 const express = require('express');
 const Book = require('../models/Book');
 const User = require('../models/User');
@@ -18,7 +16,7 @@ router.use((req, res, next) => {
 });
 
 // get list of all books
-router.get('/books', async (req, res) => {
+router.get('/books', async (_, res) => {
   try {
     const books = await Book.list();
     res.json(books);
@@ -58,9 +56,7 @@ router.get('/books/detail/:slug', async (req, res) => {
   }
 });
 
-{
-  /* github related */
-}
+// github-related
 
 // get route to retrieve a list of all repo users
 router.get('/github/repos', async (req, res) => {

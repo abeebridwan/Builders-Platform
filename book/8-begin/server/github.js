@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const { Octokit } = require('@octokit/rest');
 const fetch = require('node-fetch');
 const { oauthAuthorizationUrl } = require('@octokit/oauth-authorization-url');
@@ -89,12 +88,12 @@ function setupGithub({ server, ROOT_URL }) {
 
       const resData = await response.json();
 
-      const github = new Octokit({
+      const githubWithAccessToken = new Octokit({
         auth: resData.access_token,
         request: { timeout: 10000 },
       });
 
-      const profile = await github.users.getAuthenticated();
+      const profile = await githubWithAccessToken.users.getAuthenticated();
 
       await verify({
         user: req.user,
@@ -114,8 +113,8 @@ function setupGithub({ server, ROOT_URL }) {
 function getAPI({ user, previews = [], request }) {
   const github = new Octokit({
     auth: user.githubAccessToken,
-    request: { timeout: 10000 },
     previews,
+    request: { timeout: 10000 },
     log: {
       info(msg, info) {
         console.log(`Github API log: ${msg}`, {
@@ -129,6 +128,8 @@ function getAPI({ user, previews = [], request }) {
 
   return github;
 }
+
+// https://octokit.github.io/rest.js/v18#repos
 
 function getRepos({ user, request }) {
   const github = getAPI({ user, request });

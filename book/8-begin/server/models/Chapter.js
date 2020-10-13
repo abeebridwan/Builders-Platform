@@ -1,13 +1,12 @@
-/* eslint-disable max-len */
 /* eslint-disable no-use-before-define */
+
 const mongoose = require('mongoose');
 const marked = require('marked');
-const hljs = require('highlight.js/lib/core');
 const he = require('he');
+const hljs = require('highlight.js/lib/core');
+// const Book = require('./Book');
 const generateSlug = require('../utils/slugify');
 const Purchase = require('./Purchase');
-
-const { Schema } = mongoose;
 
 function markdownToHtml(content) {
   const renderer = new marked.Renderer();
@@ -101,6 +100,8 @@ function getSections(content) {
 
   return sections;
 }
+
+const { Schema } = mongoose;
 
 const mongoSchema = new Schema({
   bookId: {

@@ -1,12 +1,13 @@
-/* eslint-disable no-console */
 /* eslint-disable no-use-before-define */
 
 const mongoose = require('mongoose');
 const frontmatter = require('front-matter');
+
 const generateSlug = require('../utils/slugify');
-const { getCommits, getRepoDetail } = require('../github');
-const Purchase = require('./Purchase');
 const User = require('./User');
+const Purchase = require('./Purchase');
+
+const { getCommits, getRepoDetail } = require('../github');
 const { addToMailchimp } = require('../mailchimp');
 
 const { Schema } = mongoose;
@@ -86,7 +87,13 @@ class BookClass {
       modifier.slug = await generateSlug(this, name);
     }
 
-    return this.findOneAndUpdate({ _id: id }, { $set: modifier }, { new: true });
+    const editedBook = await this.findOneAndUpdate(
+      { _id: id },
+      { $set: modifier },
+      { fields: 'slug', new: true },
+    );
+
+    return editedBook;
   }
 
   static async syncContent({ id, user, request }) {

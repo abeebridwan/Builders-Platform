@@ -14,13 +14,34 @@ const styleBuyButton = {
   font: '14px Roboto',
 };
 
-// const dev = process.env.NODE_ENV !== 'production';
+const dev = process.env.NODE_ENV !== 'production';
 const port = process.env.PORT || 8000;
 const ROOT_URL = `http://localhost:${port}`;
 
 const stripePromise = loadStripe(
-  'pk_test_51HhE4SCcxenYW9mzEktFKyaBZXdZDpcHOsjSmEXUXDsGYkWxFG4AEn6rw69qme2ih1LcQvuBIkBH2VLZYiN1gWmg00dGTEfUHc',
+  dev ? process.env.STRIPE_TEST_PUBLISHABLEKEY : process.env.STRIPE_LIVE_PUBLISHABLEKEY,
 );
+
+const propTypes = {
+  book: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    slug: PropTypes.string.isRequired,
+    price: PropTypes.number.isRequired,
+    textNearButton: PropTypes.string,
+  }),
+  user: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+  }),
+  redirectToCheckout: PropTypes.bool,
+};
+
+const defaultProps = {
+  book: null,
+  user: null,
+  redirectToCheckout: false,
+};
 
 class BuyButton extends React.Component {
   componentDidMount() {
@@ -48,7 +69,7 @@ class BuyButton extends React.Component {
         redirectUrl: document.location.pathname,
       });
 
-      // When the customer clicks on the button, redirect them to Checkout page hosted by Stripe.
+      // When the customer clicks on the button, redirect them to Checkout.
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({ sessionId });
 
@@ -64,6 +85,8 @@ class BuyButton extends React.Component {
 
   render() {
     const { book, user } = this.props;
+
+    // console.log(redirectToCheckout);
 
     if (!book) {
       return null;
@@ -102,25 +125,7 @@ class BuyButton extends React.Component {
   }
 }
 
-BuyButton.propTypes = {
-  book: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    slug: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    textNearButton: PropTypes.string,
-  }),
-  user: PropTypes.shape({
-    _id: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-  }),
-  redirectToCheckout: PropTypes.bool,
-};
-
-BuyButton.defaultProps = {
-  book: null,
-  user: null,
-  redirectToCheckout: false,
-};
+BuyButton.propTypes = propTypes;
+BuyButton.defaultProps = defaultProps;
 
 export default BuyButton;

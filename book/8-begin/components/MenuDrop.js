@@ -1,42 +1,40 @@
-/* eslint-disable react/state-in-constructor */
-/* eslint-disable react/static-property-placement */
-/* eslint-disable jsx-a11y/role-supports-aria-props */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Menu from '@material-ui/core/Menu';
 import Avatar from '@material-ui/core/Avatar';
 
+const propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+  options: PropTypes.arrayOf(String).isRequired,
+};
+
 class MenuDrop extends React.Component {
-  static propTypes = {
-    src: PropTypes.string.isRequired,
-    alt: PropTypes.string.isRequired,
-    options: PropTypes.arrayOf(String).isRequired,
-  };
+  constructor() {
+    super();
 
-  state = {
-    open: false,
-    anchorEl: undefined,
-  };
-
-  button = undefined;
+    this.state = {
+      anchorEl: undefined,
+    };
+  }
 
   handleClick = (event) => {
-    this.setState({ open: true, anchorEl: event.currentTarget });
+    this.setState({ anchorEl: event.currentTarget });
   };
 
   handleClose = () => {
-    this.setState({ open: false });
+    this.setState({ anchorEl: null });
   };
 
   render() {
     const { options, src, alt } = this.props;
+    const { anchorEl } = this.state;
 
     return (
       <div>
         <Avatar
-          role="presentation"
-          aria-owns="simple-menu"
+          aria-controls={anchorEl ? 'simple-menu' : null}
           aria-haspopup="true"
           onClick={this.handleClick}
           onKeyPress={this.handleClick}
@@ -46,9 +44,10 @@ class MenuDrop extends React.Component {
         />
         <Menu
           id="simple-menu"
-          anchorEl={this.state.anchorEl}
-          open={this.state.open}
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
           onClose={this.handleClose}
+          keepMounted
         >
           <p />
           {options.map((option) => (
@@ -64,5 +63,7 @@ class MenuDrop extends React.Component {
     );
   }
 }
+
+MenuDrop.propTypes = propTypes;
 
 export default MenuDrop;

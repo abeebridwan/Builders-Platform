@@ -4,19 +4,19 @@ import Head from 'next/head';
 
 import withAuth from '../lib/withAuth';
 
+const propTypes = {
+  user: PropTypes.shape({
+    displayName: PropTypes.string,
+    email: PropTypes.string.isRequired,
+  }),
+};
+
+const defaultProps = {
+  user: null,
+};
+
 // eslint-disable-next-line react/prefer-stateless-function
 class Index extends React.Component {
-  static propTypes = {
-    user: PropTypes.shape({
-      displayName: PropTypes.string,
-      email: PropTypes.string.isRequired,
-    }),
-  };
-
-  static defaultProps = {
-    user: null,
-  };
-
   render() {
     const { user } = this.props;
     return (
@@ -25,14 +25,14 @@ class Index extends React.Component {
           <title>Settings</title>
           <meta name="description" content="List of purchased books." />
         </Head>
-        <p> List of purchased book</p>
-        <p>
-          Email:&nbsp;
-          {user.email}
-        </p>
+        <p>List of purchased books</p>
+        <p>Email:&nbsp;{user.email}</p>
       </div>
     );
   }
 }
+
+Index.propTypes = propTypes;
+Index.defaultProps = defaultProps;
 
 export default withAuth(Index);

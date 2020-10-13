@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
-const logger = require('../logs');
 
 const { Schema } = mongoose;
 
@@ -22,50 +21,49 @@ const mongoSchema = new Schema({
 
 const EmailTemplate = mongoose.model('EmailTemplate', mongoSchema);
 
-function insertTemplates() {
+async function insertTemplates() {
   const templates = [
     {
       name: 'welcome',
-      subject: 'Welcome to builderbook.org',
+      subject: 'Master Class Builders Platform',
       message: `<%= userName %>,
         <p>
-          At Builder Book, we are excited to help you build useful, 
-          production-ready web apps from scratch.
+          At Master Class Builders Platform, we are excited to help you build useful, production-ready web apps from scratch.
         </p>
         <p>
           See list of available books here.
-        </p>
 
+          ---- Web Development Fundamentals
+        </p>
         Abeeb Ridwan Olumide,
-        Team BB
+        Team MCBP
       `,
     },
   ];
 
-  templates.forEach(async (template) => {
-    if ((await EmailTemplate.find({ name: template.name }).countDocuments()) > 0) {
-      return;
-    }
+  for (const t of templates) { // eslint-disable-line
+    const et = await EmailTemplate.findOne({ name: t.name }); // eslint-disable-line
 
-    EmailTemplate.create(template).catch((error) => {
-      logger.error('EmailTemplate insertion error:', error);
-    });
-  });
+    const message = t.message.replace(/\n/g, '').replace(/[ ]+/g, ' ').trim();
+
+    if (!et) {
+      EmailTemplate.create({ ...t, message });
+    } else if (et.subject !== t.subject || et.message !== message) {
+      EmailTemplate.updateOne({ _id: et._id }, { $set: { message, subject: t.subject } }).exec();
+    }
+  }
 }
 
-insertTemplates();
-
 async function getEmailTemplate(name, params) {
-  const source = await EmailTemplate.findOne({ name });
-  if (!source) {
-    throw new Error(`No EmailTemplates found.
-      Please check that at least one is generated at server startup,
-      restart your server and try again.`);
+  const et = await EmailTemplate.findOne({ name });
+
+  if (!et) {
+    throw new Error(`No EmailTemplates found.`);
   }
 
   return {
-    message: _.template(source.message)(params),
-    subject: _.template(source.subject)(params),
+    message: _.template(et.message)(params),
+    subject: _.template(et.subject)(params),
   };
 }
 

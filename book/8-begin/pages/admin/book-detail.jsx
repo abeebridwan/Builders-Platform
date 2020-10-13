@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import NProgress from 'nprogress';
 import PropTypes from 'prop-types';
@@ -99,4 +98,4 @@ class BookDetail extends React.Component {
 
 BookDetail.propTypes = propTypes;
 
-export default withAuth(BookDetail);
+export default withAuth(BookDetail, { adminRequired: true });

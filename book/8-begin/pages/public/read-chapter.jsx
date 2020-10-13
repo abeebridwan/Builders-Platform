@@ -6,13 +6,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Error from 'next/error';
 import Head from 'next/head';
-import throttle from 'lodash/throttle';
-import Link from 'next/link';
 import { withRouter } from 'next/router';
+import throttle from 'lodash/throttle';
+
+import Link from 'next/link';
+
 import Header from '../../components/Header';
+import BuyButton from '../../components/customer/BuyButton';
 import { getChapterDetailApiMethod } from '../../lib/api/public';
 import withAuth from '../../lib/withAuth';
-import BuyButton from '../../components/customer/BuyButton';
 import notify from '../../lib/notifier';
 
 const styleIcon = {
@@ -24,6 +26,8 @@ const styleIcon = {
 const propTypes = {
   chapter: PropTypes.shape({
     _id: PropTypes.string.isRequired,
+    isPurchased: PropTypes.bool,
+    isFree: PropTypes.bool.isRequired,
     htmlContent: PropTypes.string,
     htmlExcerpt: PropTypes.string,
   }),
@@ -33,11 +37,16 @@ const propTypes = {
   router: PropTypes.shape({
     asPath: PropTypes.string.isRequired,
   }).isRequired,
+  redirectToCheckout: PropTypes.bool.isRequired,
+  checkoutCanceled: PropTypes.bool,
+  error: PropTypes.string,
 };
 
 const defaultProps = {
   chapter: null,
   user: null,
+  checkoutCanceled: false,
+  error: '',
 };
 
 class ReadChapter extends React.Component {
@@ -60,8 +69,22 @@ class ReadChapter extends React.Component {
       hideHeader: false,
       isMobile: false,
     };
-    console.log({ props: this.props });
-    console.log({ state: this.state });
+  }
+
+  static async getInitialProps(ctx) {
+    const { bookSlug, chapterSlug, buy, checkout_canceled, error } = ctx.query;
+    const { req } = ctx;
+
+    const headers = {};
+    if (req && req.headers && req.headers.cookie) {
+      headers.cookie = req.headers.cookie;
+    }
+
+    const chapter = await getChapterDetailApiMethod({ bookSlug, chapterSlug }, { headers });
+
+    const redirectToCheckout = !!buy;
+
+    return { chapter, redirectToCheckout, checkoutCanceled: !!checkout_canceled, error };
   }
 
   static getDerivedStateFromProps(props) {
@@ -92,7 +115,7 @@ class ReadChapter extends React.Component {
     }
 
     if (this.props.checkoutCanceled) {
-      notify('Checkout canceled.');
+      notify({ error: 'Checkout canceled' });
     }
 
     if (this.props.error) {
@@ -113,6 +136,10 @@ class ReadChapter extends React.Component {
       // eslint-disable-next-line
       this.setState({ chapter: prevProps.chapter, htmlContent });
     }
+  }
+
+  componentWillUnmount() {
+    document.getElementById('main-content').removeEventListener('scroll', this.onScroll);
   }
 
   onScroll = throttle(() => {
@@ -168,34 +195,22 @@ class ReadChapter extends React.Component {
     }
   };
 
-  static async getInitialProps(ctx) {
-    const { bookSlug, chapterSlug, buy, checkout_canceled, error } = ctx.query;
-    const { req } = ctx;
-
-    const headers = {};
-    if (req && req.headers && req.headers.cookie) {
-      headers.cookie = req.headers.cookie;
-    }
-
-    const chapter = await getChapterDetailApiMethod({ bookSlug, chapterSlug }, { headers });
-
-    const redirectToCheckout = !!buy;
-
-    return { chapter, redirectToCheckout, checkoutCanceled: !!checkout_canceled, error };
-  }
-
   toggleChapterList = () => {
+    // this.setState({ showTOC: !this.state.showTOC });
     this.setState((prevState) => ({ showTOC: !prevState.showTOC }));
   };
 
   closeTocWhenMobile = () => {
+    // this.setState({ showTOC: !this.state.isMobile });
     this.setState((prevState) => ({ showTOC: !prevState.isMobile }));
   };
 
   renderMainContent() {
-    const { chapter, htmlContent, showTOC, isMobile } = this.state;
-    const { book } = chapter;
     const { user, redirectToCheckout } = this.props;
+
+    const { chapter, htmlContent, showTOC, isMobile } = this.state;
+
+    const { book } = chapter;
 
     let padding = '20px 20%';
     if (!isMobile && showTOC) {
@@ -319,7 +334,7 @@ class ReadChapter extends React.Component {
     }
 
     return (
-      <div>
+      <div style={{ overflowScrolling: 'touch', WebkitOverflowScrolling: 'touch' }}>
         <Head>
           <title>
             {chapter.title === 'Introduction'

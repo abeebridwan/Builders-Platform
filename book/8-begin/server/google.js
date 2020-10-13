@@ -35,6 +35,7 @@ function auth({ ROOT_URL, server }) {
         clientID: process.env.Google_clientID,
         clientSecret: process.env.Google_clientSecret,
         callbackURL: `${ROOT_URL}/oauth2callback`,
+        userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
       },
       verify,
     ),
@@ -47,6 +48,8 @@ function auth({ ROOT_URL, server }) {
   passport.deserializeUser((id, done) => {
     User.findById(id, User.publicFields(), (err, user) => {
       done(err, user);
+      // eslint-disable-next-line no-console
+      // console.log('deserializeUser', id);
     });
   });
 
@@ -96,3 +99,5 @@ function auth({ ROOT_URL, server }) {
 }
 
 module.exports = auth;
+
+// Check if need googleToken as field for User data model

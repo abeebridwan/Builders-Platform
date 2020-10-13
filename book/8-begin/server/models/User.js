@@ -1,13 +1,11 @@
-/* eslint-disable no-console */
 const mongoose = require('mongoose');
 const _ = require('lodash');
 
+const { addToMailchimp } = require('../mailchimp');
 const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
 const logger = require('../logs');
-
-const { addToMailchimp } = require('../mailchimp');
 
 const { Schema } = mongoose;
 
@@ -55,6 +53,7 @@ const mongoSchema = new Schema({
     type: String,
     unique: true,
   },
+  purchasedBookIds: [String],
   githubUsername: {
     type: String,
     unique: true,
@@ -100,7 +99,6 @@ class UserClass {
 
     const slug = await generateSlug(this, displayName);
     const userCount = await this.find().countDocuments();
-
     const newUser = await this.create({
       createdAt: new Date(),
       googleId,
@@ -112,13 +110,13 @@ class UserClass {
       isAdmin: userCount === 0,
     });
 
-    const template = await getEmailTemplate('welcome', {
-      userName: displayName,
-    });
-
     try {
+      const template = await getEmailTemplate('welcome', {
+        userName: displayName,
+      });
+
       await sendEmail({
-        from: `Abeeb Ridwan from Builder Book <${'igortunde100@gmailcom'}>`,
+        from: `Abeeb Ridwan olumide from Builder Book <${process.env.EMAIL_ADDRESS_FROM}>`,
         to: [email],
         subject: template.subject,
         body: template.message,

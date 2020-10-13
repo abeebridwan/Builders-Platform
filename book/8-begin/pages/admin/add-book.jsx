@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import Router from 'next/router';
 import NProgress from 'nprogress';
@@ -40,4 +39,4 @@ class AddBook extends React.Component {
   }
 }
 
-export default withAuth(AddBook);
+export default withAuth(AddBook, { adminRequired: true });

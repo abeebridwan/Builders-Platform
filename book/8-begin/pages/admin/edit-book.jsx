@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import Router from 'next/router';
 import NProgress from 'nprogress';
@@ -33,7 +32,7 @@ class EditBookPage extends React.Component {
     try {
       const { slug } = this.props;
       const book = await getBookDetailApiMethod({ slug });
-       this.setState({ book }); // eslint-disable-line
+      this.setState({ book }); // eslint-disable-line
       NProgress.done();
     } catch (err) {
       notify(err.message || err.toString());
@@ -77,4 +76,4 @@ class EditBookPage extends React.Component {
 
 EditBookPage.propTypes = propTypes;
 
-export default withAuth(EditBookPage);
+export default withAuth(EditBookPage, { adminRequired: true });

@@ -3,17 +3,16 @@ const session = require('express-session');
 const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
-// eslint-disable-next-line import/no-extraneous-dependencies
-const bodyParser = require('body-parser');
-const stripe = require('./stripe');
+const compression = require('compression');
+const helmet = require('helmet');
 
-const api = require('./api');
-
-const auth = require('./google');
+const setupGoogle = require('./google');
 const { setupGithub } = require('./github');
+const api = require('./api');
 const logger = require('./logs');
 const { insertTemplates } = require('./models/EmailTemplate');
 const routesWithSlug = require('./routesWithSlug');
+const { stripeCheckoutCallback } = require('./stripe');
 
 require('dotenv').config();
 
@@ -41,12 +40,16 @@ const handle = app.getRequestHandler();
 
 app.prepare().then(async () => {
   const server = express();
-  server.use(bodyParser.json());
+
+  server.use(helmet({ contentSecurityPolicy: false }));
+  server.use(compression());
+
+  server.use(express.json());
 
   const MongoStore = mongoSessionStore(session);
   const sess = {
-    name: 'builderbook.sid',
-    secret: 'HD2w.)q*VqRT4/#NK2M/,E^B)}FED5fWU!dKe[wk',
+    name: process.env.SESSION_NAME,
+    secret: process.env.SESSION_SECRET,
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
       ttl: 14 * 24 * 60 * 60, // save session 14 days
@@ -55,7 +58,7 @@ app.prepare().then(async () => {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      maxAge: 14 * 24 * 60 * 60 * 1000,
+      maxAge: 14 * 24 * 60 * 60 * 1000, // expires in 14 days
     },
   };
 
@@ -63,12 +66,12 @@ app.prepare().then(async () => {
 
   await insertTemplates();
 
-  auth({ server, ROOT_URL });
+  setupGoogle({ server, ROOT_URL });
   setupGithub({ server, ROOT_URL });
-  stripe.stripeCheckoutCallback({ server });
   api(server);
-
   routesWithSlug({ server, app });
+
+  stripeCheckoutCallback({ server });
 
   server.get('*', (req, res) => {
     const url = URL_MAP[req.path];

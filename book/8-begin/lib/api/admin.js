@@ -27,10 +27,7 @@ export const getBookDetailApiMethod = ({ slug }) =>
     method: 'GET',
   });
 
-// eslint-disable-next-line no-lone-blocks
-{
-  /* github related */
-}
+// github methods
 
 export const getGithubReposApiMethod = () =>
   sendRequest(`${BASE_PATH}/github/repos`, {

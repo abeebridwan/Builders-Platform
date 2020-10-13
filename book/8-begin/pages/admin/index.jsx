@@ -19,7 +19,6 @@ const propTypes = {
 };
 
 const Index = ({ books }) => (
-  // eslint-disable-next-line react/jsx-filename-extension
   <div style={{ padding: '10px 45px' }}>
     <div>
       <h2>Books</h2>

@@ -1,11 +1,13 @@
-import fetch, { Response } from 'node-fetch';
+const fetch = require('node-fetch');
+
+require('dotenv').config();
 
 const LIST_IDS = {
   signedup: process.env.MAILCHIMP_SIGNEDUP_LIST_ID,
   purchased: process.env.MAILCHIMP_PURCHASED_LIST_ID,
 };
 
-function callAPI({ path, method, data }): Promise<Response> {
+function callAPI({ path, method, data }) {
   const ROOT_URI = `https://${process.env.MAILCHIMP_REGION}.api.mailchimp.com/3.0`;
 
   return fetch(`${ROOT_URI}${path}`, {
@@ -28,6 +30,9 @@ async function addToMailchimp({ email, listName }) {
   };
 
   const path = `/lists/${LIST_IDS[listName]}/members/`;
+
+  // eslint-disable-next-line
+  console.log(path, data.email_address)
 
   await callAPI({ path, method: 'POST', data });
 }
