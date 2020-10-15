@@ -5,7 +5,7 @@ const { addToMailchimp } = require('../mailchimp');
 const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
-const logger = require('../logs');
+const logger = require('../logger');
 
 const { Schema } = mongoose;
 

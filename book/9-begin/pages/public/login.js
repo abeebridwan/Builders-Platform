@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension */
 import Head from 'next/head';
 import { withRouter } from 'next/router';
 import PropTypes from 'prop-types';

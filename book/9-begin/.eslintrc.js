@@ -18,9 +18,9 @@ module.exports = {
       },
     ],
     'camelcase': 'off',
-    'max-len': ['error', 100],
     'no-underscore-dangle': ['error', { allow: ['_id'] }],
     'no-mixed-operators': 'off',
+    'prefer-arrow-callback': 'error',
     'prefer-destructuring': [
       'error',
       {
@@ -48,17 +48,7 @@ module.exports = {
     'react/jsx-filename-extension': [
       'error',
       {
-        extensions: ['.js'],
-      },
-    ],
-    'prefer-arrow-callback': 'error',
-    'prettier/prettier': [
-      'error',
-      {
-        singleQuote: true,
-        trailingComma: 'all',
-        arrowParens: 'always',
-        printWidth: 100,
+        extensions: ['.jsx'],
       },
     ],
   },

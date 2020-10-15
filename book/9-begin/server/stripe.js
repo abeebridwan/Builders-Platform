@@ -3,6 +3,7 @@ const lodash = require('lodash');
 
 const Book = require('./models/Book');
 const User = require('./models/User');
+const logger = require('./logger');
 
 const getRootUrl = require('../lib/api/getRootUrl');
 
@@ -31,7 +32,7 @@ function getBookPriceId(bookSlug) {
 }
 
 function createSession({ userId, bookId, bookSlug, userEmail, redirectUrl }) {
-  console.log(userId, bookId, bookSlug, userEmail, redirectUrl);
+  logger.info(userId, bookId, bookSlug, userEmail, redirectUrl);
   return stripeInstance.checkout.sessions.create({
     customer_email: userEmail,
     payment_method_types: ['card'],
@@ -70,11 +71,7 @@ function stripeCheckoutCallback({ server }) {
         '_id email purchasedBookIds freeBookIds',
       ).lean();
 
-      console.log(user);
-
       const book = await Book.findOne({ _id: session.metadata.bookId }, 'name slug price').lean();
-
-      console.log(book);
 
       if (!user) {
         throw new Error('User not found.');
@@ -96,7 +93,7 @@ function stripeCheckoutCallback({ server }) {
 
       res.redirect(`${ROOT_URL}${session.metadata.redirectUrl}`);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       res.redirect(
         `${ROOT_URL}${session.metadata.redirectUrl}?error=${err.message || err.toString()}`,
       );
