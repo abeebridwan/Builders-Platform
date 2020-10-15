@@ -13,6 +13,7 @@ const logger = require('./logs');
 const { insertTemplates } = require('./models/EmailTemplate');
 const routesWithSlug = require('./routesWithSlug');
 const { stripeCheckoutCallback } = require('./stripe');
+const getRootUrl = require('../lib/api/getRootUrl');
 
 require('dotenv').config();
 
@@ -28,7 +29,7 @@ const options = {
 mongoose.connect(MONGO_URL, options);
 
 const port = process.env.PORT || 8000;
-const ROOT_URL = `http://localhost:${port}`;
+const ROOT_URL = getRootUrl();
 
 const URL_MAP = {
   '/login': '/public/login',
