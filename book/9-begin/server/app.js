@@ -14,7 +14,7 @@ const { insertTemplates } = require('./models/EmailTemplate');
 const routesWithSlug = require('./routesWithSlug');
 const { stripeCheckoutCallback } = require('./stripe');
 const getRootUrl = require('../lib/api/getRootUrl');
-
+const setupSitemapAndRobots = require('./sitemapAndRobots');
 require('dotenv').config();
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -73,6 +73,7 @@ app.prepare().then(async () => {
   routesWithSlug({ server, app });
 
   stripeCheckoutCallback({ server });
+  setupSitemapAndRobots({ server });
 
   server.get('*', (req, res) => {
     const url = URL_MAP[req.path];

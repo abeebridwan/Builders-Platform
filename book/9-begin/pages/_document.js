@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension */
 /* eslint-disable react/no-danger */
 import React from 'react';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
