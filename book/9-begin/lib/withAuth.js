@@ -1,6 +1,24 @@
+/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
+import * as NProgress from 'nprogress';
+
+Router.events.on('routeChangeStart', () => {
+  NProgress.start();
+});
+
+Router.events.on('routeChangeComplete', (url) => {
+  if (window && process.env.GA_MEASUREMENT_ID) {
+    window.gtag('config', process.env.GA_MEASUREMENT_ID, {
+      page_path: url,
+    });
+  }
+
+  NProgress.done();
+});
+
+Router.events.on('routeChangeError', () => NProgress.done());
 
 let globalUser = null;
 
@@ -10,7 +28,7 @@ export default function withAuth(
 ) {
   class App extends React.Component {
     static async getInitialProps(ctx) {
-      const isFromServer = !!ctx.req;
+      const isFromServer = typeof window === 'undefined';
       const user = ctx.req ? ctx.req.user && ctx.req.user.toObject() : globalUser;
 
       if (isFromServer && user) {
