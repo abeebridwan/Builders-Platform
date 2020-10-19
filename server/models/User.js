@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 const _ = require('lodash');
+
+const { addToMailchimp } = require('../mailchimp');
 const generateSlug = require('../utils/slugify');
 const sendEmail = require('../aws');
 const { getEmailTemplate } = require('./EmailTemplate');
-const logger = require('../logs');
+const logger = require('../logger');
 
 const { Schema } = mongoose;
 
@@ -40,15 +42,21 @@ const mongoSchema = new Schema({
   displayName: String,
   avatarUrl: String,
 
-  purchasedBookIds: [String],
-  freeBookIds: [String],
-
   isGithubConnected: {
     type: Boolean,
     default: false,
   },
   githubAccessToken: {
     type: String,
+  },
+  githubId: {
+    type: String,
+    unique: true,
+  },
+  purchasedBookIds: [String],
+  githubUsername: {
+    type: String,
+    unique: true,
   },
 });
 
@@ -63,20 +71,7 @@ class UserClass {
       'isAdmin',
       'isGithubConnected',
       'purchasedBookIds',
-      'freeBookIds',
     ];
-  }
-
-  static search(query) {
-    return this.find(
-      {
-        $or: [
-          { displayName: { $regex: query, $options: 'i' } },
-          { email: { $regex: query, $options: 'i' } },
-        ],
-      },
-      UserClass.publicFields().join(' '),
-    );
   }
 
   static async signInOrSignUp({ googleId, email, googleToken, displayName, avatarUrl }) {
@@ -84,6 +79,7 @@ class UserClass {
 
     if (user) {
       const modifier = {};
+
       if (googleToken.accessToken) {
         modifier.access_token = googleToken.accessToken;
       }
@@ -103,7 +99,6 @@ class UserClass {
 
     const slug = await generateSlug(this, displayName);
     const userCount = await this.find().countDocuments();
-
     const newUser = await this.create({
       createdAt: new Date(),
       googleId,
@@ -115,19 +110,25 @@ class UserClass {
       isAdmin: userCount === 0,
     });
 
-    const template = await getEmailTemplate('welcome', {
-      userName: displayName,
-    });
-
     try {
+      const template = await getEmailTemplate('welcome', {
+        userName: displayName,
+      });
+
       await sendEmail({
-        from: `Kelly from Builder Book <${process.env.EMAIL_SUPPORT_FROM_ADDRESS}>`,
+        from: `Abeeb Ridwan olumide from Builder Book <${process.env.EMAIL_ADDRESS_FROM}>`,
         to: [email],
         subject: template.subject,
         body: template.message,
       });
     } catch (err) {
       logger.error('Email sending error:', err);
+    }
+
+    try {
+      await addToMailchimp({ email, listName: 'signedup' });
+    } catch (error) {
+      console.error('Mailchimp error:', error);
     }
 
     return _.pick(newUser, UserClass.publicFields());

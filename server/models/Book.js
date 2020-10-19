@@ -2,17 +2,13 @@
 
 const mongoose = require('mongoose');
 const frontmatter = require('front-matter');
-const { getCommits, getContent } = require('../github');
-const { charge } = require('../stripe');
-const { subscribe } = require('../mailchimp');
+
 const generateSlug = require('../utils/slugify');
 const User = require('./User');
 const Purchase = require('./Purchase');
 
-const sendEmail = require('../aws');
-const { getEmailTemplate } = require('./EmailTemplate');
-
-const logger = require('../logs');
+const { getCommits, getRepoDetail } = require('../github');
+const { addToMailchimp } = require('../mailchimp');
 
 const { Schema } = mongoose;
 
@@ -26,7 +22,6 @@ const mongoSchema = new Schema({
     required: true,
     unique: true,
   },
-
   githubRepo: {
     type: String,
     required: true,
@@ -37,23 +32,15 @@ const mongoSchema = new Schema({
     type: Date,
     required: true,
   },
-  // price in dollars
   price: {
     type: Number,
     required: true,
   },
-
-  textNearButton: String,
-
-  supportURL: String,
 });
 
 class BookClass {
   static async list({ offset = 0, limit = 10 } = {}) {
-    const books = await this.find({})
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit);
+    const books = await this.find({}).sort({ createdAt: -1 }).skip(offset).limit(limit);
     return { books };
   }
 
@@ -65,40 +52,35 @@ class BookClass {
 
     const book = bookDoc.toObject();
 
-    book.chapters = (await Chapter.find({ bookId: book._id }, 'title slug').sort({
-      order: 1,
-    })).map((ch) => ch.toObject());
+    book.chapters = (
+      await Chapter.find({ bookId: book._id }, 'title slug').sort({ order: 1 })
+    ).map((chapter) => chapter.toObject());
 
     return book;
   }
 
-  static async add({ name, price, textNearButton = '', githubRepo, supportURL = '' }) {
+  static async add({ name, price, githubRepo }) {
     const slug = await generateSlug(this, name);
-
+    if (!slug) {
+      throw new Error(`Error with slug generation for name: ${name}`);
+    }
     return this.create({
       name,
       slug,
       price,
-      textNearButton,
       githubRepo,
-      supportURL,
       createdAt: new Date(),
     });
   }
 
-  static async edit({ id, name, price, textNearButton = '', githubRepo, supportURL = '' }) {
+  static async edit({ id, name, price, githubRepo }) {
     const book = await this.findById(id, 'slug name');
 
     if (!book) {
-      throw new Error('Not found');
+      throw new Error('Book is not found by id');
     }
 
-    const modifier = {
-      price,
-      textNearButton,
-      supportURL,
-      githubRepo,
-    };
+    const modifier = { price, githubRepo };
 
     if (name !== book.name) {
       modifier.name = name;
@@ -114,57 +96,32 @@ class BookClass {
     return editedBook;
   }
 
-  static async syncOneChapter({ id, githubAccessToken, chapterId }) {
-    const book = await this.findById(id, 'userId githubRepo').lean();
-    const chapter = await Chapter.findById(chapterId, 'githubFilePath').lean();
+  static async syncContent({ id, user, request }) {
+    const book = await this.findById(id, 'githubRepo githubLastCommitSha');
 
     if (!book) {
-      throw new Error('Not found');
+      throw new Error('Book not found');
     }
 
-    const chapterContent = await getContent({
-      accessToken: githubAccessToken,
+    const repoCommits = await getCommits({
+      user,
       repoName: book.githubRepo,
-      path: chapter.githubFilePath,
+      request,
     });
 
-    const data = frontmatter(Buffer.from(chapterContent.data.content, 'base64').toString('utf8'));
-    data.path = chapter.githubFilePath;
-
-    try {
-      await Chapter.syncContent({ book, data });
-      logger.info('Content is synced', { path: chapter.githubFilePath });
-    } catch (error) {
-      logger.error('Content sync has error', { path: chapter.githubFilePath, error });
-    }
-  }
-
-  static async syncAllChapters({ id, githubAccessToken }) {
-    const book = await this.findById(id, 'userId githubRepo githubLastCommitSha').lean();
-
-    if (!book) {
-      throw new Error('Not found');
-    }
-
-    const lastCommit = await getCommits({
-      accessToken: githubAccessToken,
-      repoName: book.githubRepo,
-      limit: 1,
-    });
-
-    if (!lastCommit || !lastCommit.data || !lastCommit.data[0]) {
+    if (!repoCommits || !repoCommits.data || !repoCommits.data[0]) {
       throw new Error('No change in content!');
     }
 
-    const lastCommitSha = lastCommit.data[0].sha;
-    /*
+    const lastCommitSha = repoCommits.data[0].sha;
     if (lastCommitSha === book.githubLastCommitSha) {
       throw new Error('No change in content!');
     }
-    */
-    const mainFolder = await getContent({
-      accessToken: githubAccessToken,
+
+    const mainFolder = await getRepoDetail({
+      user,
       repoName: book.githubRepo,
+      request,
       path: '',
     });
 
@@ -174,34 +131,34 @@ class BookClass {
           return;
         }
 
-        if (f.path !== 'introduction.md' && !/chapter-(\d+)\.md/.test(f.path)) {
-          // not chapter content, skip
+        if (f.path !== 'introduction.md' && !/chapter-([0-9]+)\.md/.test(f.path)) {
           return;
         }
 
-        const chapter = await getContent({
-          accessToken: githubAccessToken,
+        const chapter = await getRepoDetail({
+          user,
           repoName: book.githubRepo,
+          request,
           path: f.path,
         });
 
         const data = frontmatter(Buffer.from(chapter.data.content, 'base64').toString('utf8'));
+
         data.path = f.path;
 
         try {
           await Chapter.syncContent({ book, data });
-          logger.info('Content is synced', { path: f.path });
+          console.log('Content is synced', { path: f.path });
         } catch (error) {
-          logger.error('Content sync has error', { path: f.path, error });
+          console.error('Content sync has error', { path: f.path, error });
         }
       }),
     );
 
-    return this.findByIdAndUpdate(book._id, { githubLastCommitSha: lastCommitSha });
+    return book.updateOne({ githubLastCommitSha: lastCommitSha });
   }
 
-  static async buy({ id, user, stripeToken }) {
-    const book = await this.findById(id, 'name slug price').lean();
+  static async buy({ book, user, stripeCharge }) {
     if (!book) {
       throw new Error('Book not found');
     }
@@ -213,42 +170,15 @@ class BookClass {
     const isPurchased =
       (await Purchase.find({ userId: user._id, bookId: book._id }).countDocuments()) > 0;
     if (isPurchased) {
-      throw new Error('Already bought this book');
+      throw new Error('You already bought this book.');
     }
 
-    const chargeObj = await charge({
-      amount: book.price * 100,
-      token: stripeToken.id,
-      bookName: book.name,
-      buyerEmail: user.email,
-    });
-
-    User.findByIdAndUpdate(user.id, { $addToSet: { purchasedBookIds: book._id } }).exec();
-
-    const template = await getEmailTemplate('purchase', {
-      userName: user.displayName,
-      bookTitle: book.name,
-      bookUrl: `https://builderbook.org/books/${book.slug}/introduction`,
-    });
+    User.findByIdAndUpdate(user._id, { $addToSet: { purchasedBookIds: book._id } }).exec();
 
     try {
-      await sendEmail({
-        from: `Kelly from builderbook.org <${process.env.EMAIL_SUPPORT_FROM_ADDRESS}>`,
-        to: [user.email],
-        subject: template.subject,
-        body: template.message,
-      });
+      await addToMailchimp({ email: user.email, listName: 'purchased' });
     } catch (error) {
-      logger.error('Email sending error:', error);
-    }
-
-    try {
-      await subscribe({
-        email: user.email,
-        listName: 'purchased',
-      });
-    } catch (error) {
-      logger.error('Mailchimp error:', error);
+      console.error('Buy book error:', error);
     }
 
     return Purchase.create({
@@ -256,54 +186,15 @@ class BookClass {
       bookId: book._id,
       amount: book.price * 100,
       createdAt: new Date(),
-      stripeCharge: chargeObj,
+      stripeCharge,
     });
   }
 
-  static async getPurchasedBooks({ purchasedBookIds, freeBookIds }) {
-    const allBooks = await this.find().sort({ createdAt: -1 });
-
-    const purchasedBooks = [];
-    const freeBooks = [];
-    const otherBooks = [];
-
-    allBooks.forEach((b) => {
-      if (purchasedBookIds.includes(b.id)) {
-        purchasedBooks.push(b);
-      } else if (freeBookIds.includes(b.id)) {
-        freeBooks.push(b);
-      } else {
-        otherBooks.push(b);
-      }
+  static async getPurchasedBooks({ purchasedBookIds }) {
+    const purchasedBooks = await this.find({ _id: { $in: purchasedBookIds } }).sort({
+      createdAt: -1,
     });
-
-    return { purchasedBooks, freeBooks, otherBooks };
-  }
-
-  static async giveFree({ id, userId }) {
-    const book = await this.findById(id, 'id');
-    if (!book) {
-      throw new Error('Book not found');
-    }
-
-    if (!userId) {
-      throw new Error('User ID required');
-    }
-
-    const isPurchased = (await Purchase.find({ userId, bookId: id }).countDocuments()) > 0;
-    if (isPurchased) {
-      throw new Error('Already bought this book');
-    }
-
-    User.findByIdAndUpdate(userId, { $addToSet: { freeBookIds: book.id } }).exec();
-
-    return Purchase.create({
-      userId,
-      bookId: book._id,
-      amount: 0,
-      createdAt: new Date(),
-      isFree: true,
-    });
+    return { purchasedBooks };
   }
 }
 

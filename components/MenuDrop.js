@@ -1,40 +1,41 @@
+/* eslint-disable react/jsx-filename-extension */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Menu from '@material-ui/core/Menu';
 import Avatar from '@material-ui/core/Avatar';
 
+const propTypes = {
+  src: PropTypes.string.isRequired,
+  alt: PropTypes.string.isRequired,
+  options: PropTypes.arrayOf(String).isRequired,
+};
+
 class MenuDrop extends React.Component {
-  static propTypes = {
-    src: PropTypes.string.isRequired,
-    alt: PropTypes.string.isRequired,
-    options: PropTypes.arrayOf(String).isRequired,
-  };
+  constructor() {
+    super();
 
-  state = {
-    anchorEl: undefined,
-    open: false,
-  };
-
-  button = undefined;
+    this.state = {
+      anchorEl: undefined,
+    };
+  }
 
   handleClick = (event) => {
-    this.setState({ anchorEl: event.currentTarget, open: true });
+    this.setState({ anchorEl: event.currentTarget });
   };
 
   handleClose = () => {
-    this.setState({ open: false });
+    this.setState({ anchorEl: null });
   };
 
   render() {
     const { options, src, alt } = this.props;
-    const { anchorEl, open } = this.state;
+    const { anchorEl } = this.state;
 
     return (
-      <div style={{ verticalAlign: 'middle', display: 'inline-block' }}>
+      <div>
         <Avatar
-          role="presentation"
-          aria-owns="simple-menu"
+          aria-controls={anchorEl ? 'simple-menu' : null}
           aria-haspopup="true"
           onClick={this.handleClick}
           onKeyPress={this.handleClick}
@@ -45,7 +46,7 @@ class MenuDrop extends React.Component {
         <Menu
           id="simple-menu"
           anchorEl={anchorEl}
-          open={open}
+          open={Boolean(anchorEl)}
           onClose={this.handleClose}
           keepMounted
         >
@@ -63,5 +64,7 @@ class MenuDrop extends React.Component {
     );
   }
 }
+
+MenuDrop.propTypes = propTypes;
 
 export default MenuDrop;

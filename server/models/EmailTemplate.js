@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
-const Handlebars = require('handlebars');
+const _ = require('lodash');
 
-const EmailTemplate = mongoose.model('EmailTemplate', {
+const { Schema } = mongoose;
+
+const mongoSchema = new Schema({
   name: {
     type: String,
     required: true,
@@ -17,73 +19,51 @@ const EmailTemplate = mongoose.model('EmailTemplate', {
   },
 });
 
+const EmailTemplate = mongoose.model('EmailTemplate', mongoSchema);
+
 async function insertTemplates() {
   const templates = [
     {
       name: 'welcome',
-      subject: 'Welcome to builderbook.org',
-      message: `{{userName}},
+      subject: 'Master Class Builders Platform',
+      message: `<%= userName %>,
         <p>
-          Thank you for signing up for Builder Book!
+          At Master Class Builders Platform, we are excited to help you build useful, production-ready web apps from scratch.
         </p>
         <p>
-          In our books, we teach you how to build production-ready web apps from scratch.
+          See list of available books here.
+
+          ---- Web Development Fundamentals
         </p>
-        <p>
-          The code for our books will always be free and open source. 
-        </p>
-      
-        Kelly & Timur, Team Builder Book
-      `,
-    },
-    {
-      name: 'purchase',
-      subject: 'You purchased "{{bookTitle}}" at builderbook.org',
-      message: `{{userName}},
-        <p>
-          Thank you for purchasing our book!
-        </p>
-        <p>
-          Start reading your book: <a href="{{bookUrl}}" target="_blank">{{bookTitle}}</a>
-        </p>
-        <p>
-          If you have any questions while reading the book, 
-          please fill out an issue on 
-          <a href="https://github.com/builderbook/builderbook target="blank">Github</a>.
-        </p>
-      
-        Kelly & Timur, Team Builder Book
+        Abeeb Ridwan Olumide,
+        Team MCBP
       `,
     },
   ];
 
-  for (let i = 0; i < templates.length; i += 1) {
-    const t = templates[i];
+  for (const t of templates) { // eslint-disable-line
+    const et = await EmailTemplate.findOne({ name: t.name }); // eslint-disable-line
 
-    // eslint-disable-next-line no-await-in-loop
-    const count = await EmailTemplate.find({ name: t.name }).countDocuments();
+    const message = t.message.replace(/\n/g, '').replace(/[ ]+/g, ' ').trim();
 
-    if (count === 0) {
-      EmailTemplate.create(
-        Object.assign({}, t, {
-          message: t.message.replace(/\n/g, '').replace(/[ ]+/g, ' '),
-        }),
-      );
+    if (!et) {
+      EmailTemplate.create({ ...t, message });
+    } else if (et.subject !== t.subject || et.message !== message) {
+      EmailTemplate.updateOne({ _id: et._id }, { $set: { message, subject: t.subject } }).exec();
     }
   }
 }
 
-insertTemplates();
-
 async function getEmailTemplate(name, params) {
-  const source = await EmailTemplate.findOne({ name });
-  if (!source) {
-    throw new Error('not found');
+  const et = await EmailTemplate.findOne({ name });
+
+  if (!et) {
+    throw new Error(`No EmailTemplates found.`);
   }
 
   return {
-    message: Handlebars.compile(source.message)(params),
-    subject: Handlebars.compile(source.subject)(params),
+    message: _.template(et.message)(params),
+    subject: _.template(et.subject)(params),
   };
 }
 

@@ -1,20 +1,18 @@
 const aws = require('aws-sdk');
 
 function sendEmail(options) {
-  aws.config.update({
-    region: process.env.Amazon_region,
-    accessKeyId: process.env.Amazon_accessKeyId,
-    secretAccessKey: process.env.Amazon_secretAccessKey,
+  const ses = new aws.SES({
+    apiVersion: 'latest',
+    region: process.env.AWS_REGION,
+    accessKeyId: process.env.AWS_ACCESSKEYID,
+    secretAccessKey: process.env.AWS_SECRETACCESSKEY,
   });
-
-  const ses = new aws.SES({ apiVersion: 'latest' });
 
   return new Promise((resolve, reject) => {
     ses.sendEmail(
       {
         Source: options.from,
         Destination: {
-          CcAddresses: options.cc,
           ToAddresses: options.to,
         },
         Message: {
@@ -27,7 +25,6 @@ function sendEmail(options) {
             },
           },
         },
-        ReplyToAddresses: options.replyTo,
       },
       (err, info) => {
         if (err) {

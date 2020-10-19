@@ -1,10 +1,7 @@
 const express = require('express');
-const _ = require('lodash');
-
 const Book = require('../models/Book');
-const Chapter = require('../models/Chapter');
 const Purchase = require('../models/Purchase');
-const logger = require('../logs');
+const { createSession } = require('../stripe');
 
 const router = express.Router();
 
@@ -17,74 +14,44 @@ router.use((req, res, next) => {
   next();
 });
 
+router.post('/stripe/fetch-checkout-session', async (req, res) => {
+  try {
+    const { bookId, redirectUrl } = req.body;
+
+    const book = await Book.findById(bookId).select(['slug']).setOptions({ lean: true });
+
+    if (!book) {
+      throw new Error('Book not found');
+    }
+
+    const isPurchased =
+      (await Purchase.find({ userId: req.user._id, bookId: book._id }).countDocuments()) > 0;
+    if (isPurchased) {
+      throw new Error('You already bought this book.');
+    }
+
+    const session = await createSession({
+      userId: req.user._id.toString(),
+      userEmail: req.user.email,
+      bookId,
+      bookSlug: book.slug,
+      redirectUrl,
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (err) {
+    console.error(err);
+    res.json({ error: err.message || err.toString() });
+  }
+});
+
 router.get('/my-books', async (req, res) => {
   try {
-    const { purchasedBookIds = [], freeBookIds = [] } = req.user;
+    const { purchasedBookIds = [] } = req.user;
 
-    const { purchasedBooks, freeBooks, otherBooks } = await Book.getPurchasedBooks({
-      purchasedBookIds,
-      freeBookIds,
-    });
+    const { purchasedBooks } = await Book.getPurchasedBooks({ purchasedBookIds });
 
-    res.json({ purchasedBooks, freeBooks, otherBooks });
-  } catch (err) {
-    res.json({ error: err.message || err.toString() });
-  }
-});
-
-router.get('/my-bookmarks', async (req, res) => {
-  try {
-    const { user } = req;
-    const allPurchases = await Purchase.find({ userId: user._id }, 'bookId bookmarks').lean();
-    // logger.info(allPurchases);
-
-    const bookmarks = await Promise.all(allPurchases.map(async (purchase) => {
-      if (!purchase.bookmarks || purchase.bookmarks.length < 1) {
-        return null;
-      }
-
-      const book = await Book.findById(purchase.bookId, 'name slug').lean();
-      // logger.info(book.name);
-      return {
-        bookName: book.name,
-        bookSlug: book.slug,
-        bookmarksArray: _.sortBy(purchase.bookmarks, 'chapterOrder'),
-      };
-    }));
-
-    res.json({ bookmarks: bookmarks.filter(b => !!b) });
-  } catch (err) {
-    res.json({ error: err.message || err.toString() });
-  }
-});
-
-router.post('/buy-book', async (req, res) => {
-  const { id, stripeToken } = req.body;
-
-  try {
-    await Book.buy({ id, stripeToken, user: req.user });
-    res.json({ done: 1 });
-  } catch (err) {
-    logger.error(err);
-    res.json({ error: err.message || err.toString() });
-  }
-});
-
-router.post('/chapters/add-bookmark', async (req, res) => {
-  const {
-    chapterId, chapterSlug, chapterOrder, hash, text,
-  } = req.body;
-  // logger.info(chapterSlug);
-  try {
-    await Chapter.addBookmark({
-      chapterId,
-      chapterSlug,
-      chapterOrder,
-      hash,
-      text,
-      userId: req.user.id,
-    });
-    res.json({ saved: 1 });
+    res.json({ purchasedBooks });
   } catch (err) {
     res.json({ error: err.message || err.toString() });
   }

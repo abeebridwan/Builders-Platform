@@ -1,27 +1,25 @@
 const express = require('express');
 const session = require('express-session');
-const compression = require('compression');
 const mongoSessionStore = require('connect-mongo');
 const next = require('next');
 const mongoose = require('mongoose');
+const compression = require('compression');
 const helmet = require('helmet');
-const routesWithSlug = require('./routesWithSlug');
-const routesWithCache = require('./routesWithCache');
-const sitemapAndRobots = require('./sitemapAndRobots');
 
-const auth = require('./google');
+const setupGoogle = require('./google');
 const { setupGithub } = require('./github');
 const api = require('./api');
 
-const logger = require('./logs');
+const logger = require('./logger');
 const { insertTemplates } = require('./models/EmailTemplate');
+const routesWithSlug = require('./routesWithSlug');
+const getRootUrl = require('../lib/api/getRootUrl');
+const setupSitemapAndRobots = require('./sitemapAndRobots');
+const { stripeCheckoutCallback } = require('./stripe');
 
 require('dotenv').config();
 
 const dev = process.env.NODE_ENV !== 'production';
-const port = process.env.PORT || 8000;
-const ROOT_URL = dev ? `http://localhost:${port}` : 'https://builderbook.org';
-
 const MONGO_URL = dev ? process.env.MONGO_URL_TEST : process.env.MONGO_URL;
 
 const options = {
@@ -30,10 +28,10 @@ const options = {
   useFindAndModify: false,
   useUnifiedTopology: true,
 };
-
 mongoose.connect(MONGO_URL, options);
 
-const sessionSecret = process.env.SESSION_SECRET;
+const port = process.env.PORT || 8000;
+const ROOT_URL = getRootUrl();
 
 const URL_MAP = {
   '/login': '/public/login',
@@ -46,30 +44,19 @@ const handle = app.getRequestHandler();
 app.prepare().then(async () => {
   const server = express();
 
-  server.use(helmet());
+  server.use(helmet({ contentSecurityPolicy: false }));
   server.use(compression());
   server.use(express.json());
-
-  // potential fix for Error: Can't set headers
-  // try reproducing with Chrome Dev Tools open
-
-  // if (!dev) {
-  //   server.use(compression());
-  // };
 
   // give all Nextjs's request to Nextjs server
   server.get('/_next/*', (req, res) => {
     handle(req, res);
   });
 
-  server.get('/static/*', (req, res) => {
-    handle(req, res);
-  });
-
   const MongoStore = mongoSessionStore(session);
   const sess = {
-    name: 'builderbook.sid',
-    secret: sessionSecret,
+    name: process.env.SESSION_NAME,
+    secret: process.env.SESSION_SECRET,
     store: new MongoStore({
       mongooseConnection: mongoose.connection,
       ttl: 14 * 24 * 60 * 60, // save session 14 days
@@ -83,22 +70,23 @@ app.prepare().then(async () => {
   };
 
   if (!dev) {
-    server.set('trust proxy', 1); // trust first proxy
-    sess.cookie.secure = true; // serve secure cookies
+    server.set('trust proxy', 1); // sets req.hostname, req.ip
+    sess.cookie.secure = true; // sets cookie over HTTPS only
+    sess.cookie.domain = process.env.COOKIE_DOMAIN; // sets domain for production env
   }
 
   server.use(session(sess));
 
   await insertTemplates();
 
-  auth({ server, ROOT_URL });
-  setupGithub({ server });
+  setupGoogle({ server, ROOT_URL });
+  setupGithub({ server, ROOT_URL });
   api(server);
-
   routesWithSlug({ server, app });
-  routesWithCache({ server, app });
 
-  sitemapAndRobots({ server });
+  stripeCheckoutCallback({ server });
+
+  setupSitemapAndRobots({ server });
 
   server.get('*', (req, res) => {
     const url = URL_MAP[req.path];

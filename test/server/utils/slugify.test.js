@@ -1,7 +1,7 @@
-import generateSlug from '../../../server/utils/slugify';
+const generateSlug = require('../../../server/utils/slugify');
 
 const MockUser = {
-  slugs: ['john-and-jonhson', 'john-and-jonhson-1', 'john'],
+  slugs: ['john-jonhson-jr', 'john-jonhson-jr-1', 'john'],
   findOne({ slug }) {
     if (this.slugs.includes(slug)) {
       return Promise.resolve({ id: 'id' });
@@ -12,27 +12,27 @@ const MockUser = {
 };
 
 describe('slugify', () => {
-  test('not duplicated', () => {
+  test('no duplication', () => {
     expect.assertions(1);
 
-    return generateSlug(MockUser, 'John J Jonhson@#$').then((slug) => {
-      expect(slug).toBe('john-j-jonhson');
+    return generateSlug(MockUser, 'John Jonhson.').then((slug) => {
+      expect(slug).toBe('john-jonhson');
     });
   });
 
-  test('one time duplicated', () => {
+  test('one duplication', () => {
     expect.assertions(1);
 
-    return generateSlug(MockUser, ' John@#$').then((slug) => {
+    return generateSlug(MockUser, 'John.').then((slug) => {
       expect(slug).toBe('john-1');
     });
   });
 
-  test('multiple duplicated', () => {
+  test('multiple duplications', () => {
     expect.assertions(1);
 
-    return generateSlug(MockUser, 'John & Jonhson@#$').then((slug) => {
-      expect(slug).toBe('john-and-jonhson-2');
+    return generateSlug(MockUser, 'John Jonhson Jr.').then((slug) => {
+      expect(slug).toBe('john-jonhson-jr-2');
     });
   });
 });

@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension */
 import PropTypes from 'prop-types';
 import Link from 'next/link';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -8,7 +9,7 @@ import Avatar from '@material-ui/core/Avatar';
 
 import MenuDrop from './MenuDrop';
 
-import { styleToolbar, styleRaisedButton } from '../lib/SharedStyles';
+import { styleToolbar, styleRaisedButton } from './SharedStyles';
 
 const optionsMenuCustomer = [
   {
@@ -33,7 +34,24 @@ const optionsMenuAdmin = [
   },
 ];
 
-function Header({ user, hideHeader, next }) {
+const propTypes = {
+  user: PropTypes.shape({
+    avatarUrl: PropTypes.string,
+    displayName: PropTypes.string,
+    isAdmin: PropTypes.bool,
+    isGithubConnected: PropTypes.bool,
+  }),
+  hideHeader: PropTypes.bool,
+  redirectUrl: PropTypes.string,
+};
+
+const defaultProps = {
+  user: null,
+  hideHeader: false,
+  redirectUrl: '',
+};
+
+function Header({ user, hideHeader, redirectUrl }) {
   return (
     <div
       style={{
@@ -46,13 +64,13 @@ function Header({ user, hideHeader, next }) {
     >
       <Toolbar style={styleToolbar}>
         <Grid container direction="row" justify="space-around" alignItems="center">
-          <Grid item sm={6} xs={1} style={{ textAlign: 'left' }}>
+          <Grid item sm={8} xs={7} style={{ textAlign: 'left' }}>
             {!user ? (
               <Link href="/">
                 <Avatar
                   src="https://storage.googleapis.com/builderbook/logo.svg"
                   alt="Builder Book logo"
-                  style={{ margin: '0px auto 0px 10px', cursor: 'pointer' }}
+                  style={{ margin: '0px auto 0px 20px', cursor: 'pointer' }}
                 />
               </Link>
             ) : null}
@@ -68,9 +86,9 @@ function Header({ user, hideHeader, next }) {
               </Hidden>
             ) : null}
           </Grid>
-          <Grid item sm={4} xs={9} style={{ textAlign: 'right' }}>
+          <Grid item sm={2} xs={3} style={{ textAlign: 'right' }}>
             {user ? (
-              <div style={{ whiteSpace: 'nowrap' }}>
+              <div style={{ whiteSpace: ' nowrap' }}>
                 {!user.isAdmin ? (
                   <MenuDrop
                     options={optionsMenuCustomer}
@@ -87,26 +105,18 @@ function Header({ user, hideHeader, next }) {
                 ) : null}
               </div>
             ) : (
-              <div>
-                <Link href="/book">
-                  <a style={{ margin: '20px 20px 0px auto' }}>Book</a>
-                </Link>
-                <Link href="/tutorials">
-                  <a style={{ margin: '20px 20px 0px auto' }}>Tutorials</a>
-                </Link>
-                <Link
-                  href={{
-                    pathname: '/public/login',
-                    query: { next },
-                  }}
-                  as={{
-                    pathname: '/login',
-                    query: { next },
-                  }}
-                >
-                  <a style={{ margin: '0px 20px 0px auto' }}>Log in</a>
-                </Link>
-              </div>
+              <Link
+                href={{
+                  pathname: '/public/login',
+                  query: { redirectUrl },
+                }}
+                as={{
+                  pathname: '/login',
+                  query: { redirectUrl },
+                }}
+              >
+                <a style={{ margin: '0px 20px 0px auto' }}>Log in</a>
+              </Link>
             )}
           </Grid>
         </Grid>
@@ -115,22 +125,7 @@ function Header({ user, hideHeader, next }) {
   );
 }
 
-Header.propTypes = {
-  user: PropTypes.shape({
-    displayName: PropTypes.string,
-    email: PropTypes.string.isRequired,
-    isAdmin: PropTypes.bool,
-    avatarUrl: PropTypes.string,
-    isGithubConnected: PropTypes.bool,
-  }),
-  hideHeader: PropTypes.bool,
-  next: PropTypes.string,
-};
-
-Header.defaultProps = {
-  user: null,
-  hideHeader: false,
-  next: '',
-};
+Header.propTypes = propTypes;
+Header.defaultProps = defaultProps;
 
 export default Header;

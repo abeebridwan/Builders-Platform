@@ -3,13 +3,10 @@
 const mongoose = require('mongoose');
 const marked = require('marked');
 const he = require('he');
-const hljs = require('highlight.js');
-
-const Purchase = require('./Purchase');
-
+const hljs = require('highlight.js/lib/core');
+// const Book = require('./Book');
 const generateSlug = require('../utils/slugify');
-
-const { Schema } = mongoose;
+const Purchase = require('./Purchase');
 
 function markdownToHtml(content) {
   const renderer = new marked.Renderer();
@@ -19,7 +16,12 @@ function markdownToHtml(content) {
     return `<a target="_blank" href="${href}" rel="noopener noreferrer"${t}>${text}</a>`;
   };
 
-  renderer.image = (href) => `<img src="${href}" width="100%" alt="Builder Book">`;
+  renderer.image = (href) => `<img
+    src="${href}"
+    style="border: 1px solid #ddd;"
+    width="100%"
+    alt="Builder Book"
+  >`;
 
   renderer.heading = (text, level) => {
     const escapedText = text
@@ -29,34 +31,30 @@ function markdownToHtml(content) {
 
     if (level === 2) {
       return `<h${level} class="chapter-section" style="color: #222; font-weight: 400;">
-        <a
-          name="${escapedText}"
-          href="#${escapedText}"
-          style="color: #222;"
-        > 
-          <i class="material-icons" style="vertical-align: middle; opacity: 0.5; cursor: pointer;">
-            link
-          </i>
-        </a>
-        <span class="section-anchor" name="${escapedText}">
-          ${text}
-        </span>
-      </h${level}>`;
+          <a
+            name="${escapedText}"
+            href="#${escapedText}"
+            style="color: #222;"
+          > 
+            <i class="material-icons" style="vertical-align: middle; opacity: 0.5; cursor: pointer;">link</i>
+          </a>
+          <span class="section-anchor" name="${escapedText}">
+            ${text}
+          </span>
+        </h${level}>`;
     }
 
     if (level === 4) {
       return `<h${level} style="color: #222;">
-        <a
-          name="${escapedText}"
-          href="#${escapedText}"
-          style="color: #222;"
-        >
-          <i class="material-icons" style="vertical-align: middle; opacity: 0.5; cursor: pointer;">
-            link
-          </i>
-        </a>
-        ${text}
-      </h${level}>`;
+          <a
+            name="${escapedText}"
+            href="#${escapedText}"
+            style="color: #222;"
+          >
+            <i class="material-icons" style="vertical-align: middle; opacity: 0.5; cursor: pointer;">link</i>
+          </a>
+          ${text}
+        </h${level}>`;
     }
 
     return `<h${level} style="color: #222; font-weight: 400;">${text}</h${level}>`;
@@ -102,6 +100,8 @@ function getSections(content) {
 
   return sections;
 }
+
+const { Schema } = mongoose;
 
 const mongoSchema = new Schema({
   bookId: {
@@ -162,75 +162,31 @@ const mongoSchema = new Schema({
 });
 
 class ChapterClass {
-  static async addBookmark({ chapterId, chapterSlug, chapterOrder, hash, text, userId }) {
-    if (!userId) {
-      throw new Error('User is required');
-    }
-
-    const chapter = await this.findById(chapterId, 'bookId').lean();
-    if (!chapter) {
-      throw new Error('Chapter not found');
-    }
-
-    const book = await Book.findById(chapter.bookId, 'id').lean();
-    if (!book) {
-      throw new Error('Book not found');
-    }
-
-    const purchase = await Purchase.findOne({ userId, bookId: book._id }, 'id bookmarks');
-    if (!purchase) {
-      throw new Error('You have not bought this book.');
-    }
-    // console.log(chapterSlug);
-    for (let i = 0; i < purchase.bookmarks.length; i += 1) {
-      const b = purchase.bookmarks[i];
-      if (b.chapterId.equals(chapterId)) {
-        purchase.bookmarks.pull(b._id);
-      }
-    }
-
-    purchase.bookmarks.push({
-      chapterId,
-      chapterSlug,
-      chapterOrder,
-      hash,
-      text,
-    });
-
-    return purchase.save();
-  }
-
   static async getBySlug({ bookSlug, chapterSlug, userId, isAdmin }) {
     const book = await Book.getBySlug({ slug: bookSlug });
     if (!book) {
-      throw new Error('Not found');
+      throw new Error('Book not found');
     }
 
     const chapter = await this.findOne({ bookId: book._id, slug: chapterSlug });
 
     if (!chapter) {
-      throw new Error('Not found');
+      throw new Error('Chapter not found');
     }
 
     const chapterObj = chapter.toObject();
     chapterObj.book = book;
 
     if (userId) {
-      const purchase = await Purchase.findOne({ userId, bookId: book._id }, 'bookmarks');
+      const purchase = await Purchase.findOne({ userId, bookId: book._id });
 
       chapterObj.isPurchased = !!purchase || isAdmin;
-
-      ((purchase && purchase.bookmarks) || []).forEach((b) => {
-        if (chapter._id.equals(b.chapterId)) {
-          chapterObj.bookmark = b;
-        }
-      });
     }
 
-    const isPurchased = chapter.isFree || chapterObj.isPurchased;
+    const isFreeOrPurchased = chapter.isFree || chapterObj.isPurchased;
 
-    if (!isPurchased) {
-      delete chapterObj.content;
+    if (!isFreeOrPurchased) {
+      delete chapterObj.htmlContent;
     }
 
     return chapterObj;
@@ -248,9 +204,9 @@ class ChapterClass {
     const { body, path } = data;
 
     const chapter = await this.findOne({
-      bookId: book._id,
+      bookId: book.id,
       githubFilePath: path,
-    }).lean();
+    });
 
     let order;
 
@@ -304,30 +260,6 @@ class ChapterClass {
         bookId: chapter.bookId,
       });
     }
-
-    const purchasesWithBookmark = await Purchase.find(
-      { bookId: book._id, bookmarks: { $elemMatch: { chapterId: chapter._id } } },
-      '_id bookmarks',
-    ).lean();
-
-    const orderForBookmark = modifier.order;
-    const slugForBookmark = modifier.slug;
-
-    await Promise.all(
-      purchasesWithBookmark.map(async (purchase) => {
-        const { chapterId } = purchase.bookmarks[0];
-
-        const modifierForBookmark = {
-          'bookmarks.$.chapterOrder': orderForBookmark,
-          'bookmarks.$.chapterSlug': slugForBookmark,
-        };
-
-        await Purchase.updateOne(
-          { _id: purchase._id, 'bookmarks.chapterId': chapterId },
-          { $set: modifierForBookmark },
-        );
-      }),
-    );
 
     return this.updateOne({ _id: chapter._id }, { $set: modifier });
   }

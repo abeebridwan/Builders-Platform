@@ -1,25 +1,13 @@
-const slugify = (text) =>
-  text
-    .toString()
-    .toLowerCase()
-    .trim()
-    // Replace spaces with -
-    .replace(/\s+/g, '-')
-    // Replace & with 'and'
-    .replace(/&/g, '-and-')
-    // Remove all non-word chars
-    .replace(/(?!\w)[\x00-\xC0]/g, '-') // eslint-disable-line
-    // Replace multiple - with single -
-    .trim('-')
-    .replace(/\-\-+/g, '-') // eslint-disable-line
-    // Remove - from start & end
-    .replace(/-$/, '')
-    .replace(/^-/, '');
+const _ = require('lodash');
+
+// https://devdocs.io/lodash~4/index#kebabCase
+
+const slugify = (text) => _.kebabCase(text);
 
 async function createUniqueSlug(Model, slug, count) {
-  const obj = await Model.findOne({ slug: `${slug}-${count}` }, 'id');
+  const user = await Model.findOne({ slug: `${slug}-${count}` }, 'id');
 
-  if (!obj) {
+  if (!user) {
     return `${slug}-${count}`;
   }
 
@@ -29,9 +17,9 @@ async function createUniqueSlug(Model, slug, count) {
 async function generateSlug(Model, name, filter = {}) {
   const origSlug = slugify(name);
 
-  const obj = await Model.findOne({ slug: origSlug, ...filter }, 'id');
+  const user = await Model.findOne({ slug: origSlug, ...filter }, 'id');
 
-  if (!obj) {
+  if (!user) {
     return origSlug;
   }
 

@@ -1,7 +1,9 @@
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/styles';
 import App from 'next/app';
+import PropTypes from 'prop-types';
 import React from 'react';
+import Head from 'next/head';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 
@@ -10,26 +12,16 @@ import { theme } from '../lib/theme';
 import Notifier from '../components/Notifier';
 import Header from '../components/Header';
 
-import * as gtag from '../lib/gtag';
-
 Router.onRouteChangeStart = () => NProgress.start();
-Router.onRouteChangeComplete = (url) => {
-  NProgress.done();
-  gtag.pageview(url);
-};
+Router.onRouteChangeComplete = () => NProgress.done();
 Router.onRouteChangeError = () => NProgress.done();
 
+const propTypes = {
+  Component: PropTypes.elementType.isRequired,
+  pageProps: PropTypes.object.isRequired, // eslint-disable-line
+};
+
 class MyApp extends App {
-  static async getInitialProps({ Component, ctx }) {
-    const pageProps = {};
-
-    if (Component.getInitialProps) {
-      Object.assign(pageProps, await Component.getInitialProps(ctx));
-    }
-
-    return { pageProps };
-  }
-
   componentDidMount() {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side');
@@ -41,21 +33,25 @@ class MyApp extends App {
   render() {
     const { Component, pageProps } = this.props;
 
-    console.log(pageProps);
+    // console.log(pageProps);
+    // console.log(pageProps.noHeader);
 
     return (
       <ThemeProvider theme={theme}>
         {/* ThemeProvider makes the theme available down the React tree thanks to React context. */}
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+        <Head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        </Head>
         <CssBaseline />
-        {pageProps.chapter || pageProps.toc || pageProps.tutorials || pageProps.indexPage ? null : (
-          <Header {...pageProps} />
-        )}
+        {pageProps.chapter ? null : <Header {...pageProps} />}
         <Component {...pageProps} />
         <Notifier />
       </ThemeProvider>
     );
   }
 }
+
+MyApp.propTypes = propTypes;
 
 export default MyApp;
