@@ -17,4 +17,5 @@
       "changeProcessCWD": true
     },
   ],
+  "git.ignoreLimitWarning": true,
 }
