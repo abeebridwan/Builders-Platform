@@ -187,6 +187,7 @@ class ChapterClass {
 
     if (!isFreeOrPurchased) {
       delete chapterObj.htmlContent;
+      delete chapterObj.content;
     }
 
     return chapterObj;

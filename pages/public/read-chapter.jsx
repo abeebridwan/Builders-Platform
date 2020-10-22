@@ -212,7 +212,7 @@ class ReadChapter extends React.Component {
 
     const { book } = chapter;
 
-    let padding = '20px 20%';
+    let padding = '20px 17%';
     if (!isMobile && showTOC) {
       padding = '20px 10%';
     } else if (isMobile) {
@@ -330,7 +330,7 @@ class ReadChapter extends React.Component {
 
     let left = '20px';
     if (showTOC) {
-      left = isMobile ? '100%' : '400px';
+      left = isMobile ? '100%' : '270px';
     }
 
     return (
