@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon server/app.js --watch server",
     "build": "next build",
-    "start": "NODE_ENV=production node server/app.jss -p $PORT",
+    "start": "NODE_ENV=production node server/app.js -p $PORT",
     "lint": "eslint '**/*.js' '**/*.jsx'",
     "test": "jest --coverage"
   },
