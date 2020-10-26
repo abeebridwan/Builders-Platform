@@ -5,11 +5,11 @@ const Book = require('./models/Book');
 const User = require('./models/User');
 const logger = require('./logger');
 
-const getRootUrl = require('../lib/api/getRootUrl');
+// const getRootUrl = require('../lib/api/getRootUrl');
 
 const dev = process.env.NODE_ENV !== 'production';
 const API_KEY = dev ? process.env.STRIPE_TEST_SECRETKEY : process.env.STRIPE_LIVE_SECRETKEY;
-const ROOT_URL = getRootUrl();
+const ROOT_URL = 'https://mcbp.herokuapp.com';
 
 const stripeInstance = new Stripe(API_KEY, { apiVersion: '2020-08-27' });
 

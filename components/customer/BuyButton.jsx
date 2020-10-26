@@ -14,13 +14,11 @@ const styleBuyButton = {
   font: '14px Roboto',
 };
 
-const dev = process.env.NODE_ENV !== 'production';
-const port = process.env.PORT || 8000;
-const ROOT_URL = `http://localhost:${port}`;
+// const dev = process.env.NODE_ENV !== 'production';
+// const port = process.env.PORT || 8000;
+const ROOT_URL = 'https://mcbp.herokuapp.com';
 
-const stripePromise = loadStripe(
-  dev ? process.env.STRIPE_TEST_PUBLISHABLEKEY : process.env.STRIPE_LIVE_PUBLISHABLEKEY,
-);
+const stripePromise = loadStripe(process.env.STRIPE_TEST_PUBLISHABLEKEY);
 
 const propTypes = {
   book: PropTypes.shape({

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const { Octokit } = require('@octokit/rest');
 const fetch = require('node-fetch');
 const { oauthAuthorizationUrl } = require('@octokit/oauth-authorization-url');
@@ -133,6 +134,7 @@ function getAPI({ user, previews = [], request }) {
 
 function getRepos({ user, request }) {
   const github = getAPI({ user, request });
+  console.log(github);
 
   return github.repos.listForAuthenticatedUser({
     visibility: 'public',

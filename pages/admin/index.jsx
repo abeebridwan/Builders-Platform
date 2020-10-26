@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React from 'react';
 import PropTypes from 'prop-types';
 import Link from 'next/link';
@@ -70,6 +71,7 @@ class IndexWithData extends React.Component {
 
     try {
       const { books } = await getBookListApiMethod();
+      console.log(books);
       this.setState({ books }); // eslint-disable-line
     } catch (err) {
       notify(err);

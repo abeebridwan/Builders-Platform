@@ -3,9 +3,9 @@ const path = require('path');
 const zlib = require('zlib');
 const Chapter = require('./models/Chapter');
 const logger = require('./logger');
-const getRootUrl = require('../lib/api/getRootUrl');
+// const getRootUrl = require('../lib/api/getRootUrl');
 
-const ROOT_URL = getRootUrl();
+const ROOT_URL = 'https://mcbp.herokuapp.com';
 
 function setupSitemapAndRobots({ server }) {
   let sitemap;
