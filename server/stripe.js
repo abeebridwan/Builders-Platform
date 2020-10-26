@@ -17,9 +17,9 @@ function getBookPriceId(bookSlug) {
   let priceId;
 
   if (bookSlug === 'demo-book') {
-    priceId = process.env.STRIPE_TEST_SECRETKEY;
+    priceId = process.env.STRIPE_TEST_DEMO_BOOK_PRICE_ID;
   } else if (bookSlug === 'second-book') {
-    priceId = process.env.STRIPE_TEST_SECRETKEY;
+    priceId = process.env.STRIPE_TEST_SECOND_BOOK_PRICE_ID;
   } else {
     throw new Error('Wrong book');
   }
