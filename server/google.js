@@ -35,6 +35,7 @@ function auth({ ROOT_URL, server }) {
         clientID: process.env.Google_clientID,
         clientSecret: process.env.Google_clientSecret,
         callbackURL: `${ROOT_URL}/oauth2callback`,
+        proxy: true,
         userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
       },
       verify,
@@ -62,7 +63,7 @@ function auth({ ROOT_URL, server }) {
       prompt: 'select_account',
     };
     // eslint-disable-next-line
-      console.log(`req.query.redirectUrl:${req.query.redirectUrl}`);
+    console.log(`req.query.redirectUrl:${req.query.redirectUrl}`);
 
     if (req.query && req.query.redirectUrl && req.query.redirectUrl.startsWith('/')) {
       req.session.finalUrl = req.query.redirectUrl;
