@@ -7,8 +7,8 @@ const logger = require('./logger');
 
 // const getRootUrl = require('../lib/api/getRootUrl');
 
-const dev = process.env.NODE_ENV !== 'production';
-const API_KEY = dev ? process.env.STRIPE_TEST_SECRETKEY : process.env.STRIPE_LIVE_SECRETKEY;
+// const dev = process.env.NODE_ENV !== 'production';
+const API_KEY = process.env.STRIPE_TEST_SECRETKEY;
 const ROOT_URL = 'https://mcbp.herokuapp.com';
 
 const stripeInstance = new Stripe(API_KEY, { apiVersion: '2020-08-27' });
@@ -17,13 +17,9 @@ function getBookPriceId(bookSlug) {
   let priceId;
 
   if (bookSlug === 'demo-book') {
-    priceId = dev
-      ? process.env.STRIPE_TEST_DEMO_BOOK_PRICE_ID
-      : process.env.STRIPE_LIVE_DEMO_BOOK_PRICE_ID;
+    priceId = process.env.STRIPE_TEST_SECRETKEY;
   } else if (bookSlug === 'second-book') {
-    priceId = dev
-      ? process.env.STRIPE_TEST_SECOND_BOOK_PRICE_ID
-      : process.env.STRIPE_LIVE_SECOND_BOOK_PRICE_ID;
+    priceId = process.env.STRIPE_TEST_SECRETKEY;
   } else {
     throw new Error('Wrong book');
   }
