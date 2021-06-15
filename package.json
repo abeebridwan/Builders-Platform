@@ -9,6 +9,9 @@
     "lint": "eslint '**/*.js' '**/*.jsx'",
     "test": "jest --coverage"
   },
+  "engines": {
+    "node": "12.16.1"
+  },
   "jest": {
     "coverageDirectory": "./.coverage"
   },

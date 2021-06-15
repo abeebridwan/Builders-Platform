@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension */
 /* eslint-disable react/state-in-constructor */
 import React from 'react';
 import Snackbar from '@material-ui/core/Snackbar';
