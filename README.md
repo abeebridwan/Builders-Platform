@@ -74,9 +74,8 @@ User roles, access, and pages are separated into admins, customers, and public
 
      - they get to see and read the free contents
 
-     - purchase the books/contents and signup with **a single click**
-    
------------------- more Features of the open-source app noted below ---------------
+     - purchase the books/contents and signup with **a single click**    
+
 
 ## More Features in the App
  - app sends an email to a user using AWS SES immediately after signup/purchase
@@ -100,7 +99,7 @@ User roles, access, and pages are separated into admins, customers, and public
   - SEO friendly features included
   - many more - find out by checking the app by running it locally
 
-check it out  here: https://mcbp.herokuapp.com
+check it out  here: https://mcbp.herokuapp.com/books/demo-book/introduction
 
 ## Screenshots
 Chapter excerpt with Buy Button for Public/Guest visitor:<br><br>
