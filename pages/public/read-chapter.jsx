@@ -115,7 +115,9 @@ class ReadChapter extends React.Component {
     }
 
     if (this.props.checkoutCanceled) {
-      notify({ error: 'Checkout canceled' });
+      setTimeout(() => {
+        notify('Checkout canceled');
+      }, 1000);
     }
 
     if (this.props.error) {
