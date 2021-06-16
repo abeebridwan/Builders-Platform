@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import NProgress from 'nprogress';
 import Button from '@material-ui/core/Button';
 import { loadStripe } from '@stripe/stripe-js';
-import { getRootUrl } from '../../lib/api/getRootUrl';
+import getRootUrl from '../../lib/api/getRootUrl';
 import { fetchCheckoutSessionApiMethod } from '../../lib/api/customer';
 
 import notify from '../../lib/notifier';
