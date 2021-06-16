@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import NProgress from 'nprogress';
 import Button from '@material-ui/core/Button';
 import { loadStripe } from '@stripe/stripe-js';
-
+import { getRootUrl } from '../../lib/api/getRootUrl';
 import { fetchCheckoutSessionApiMethod } from '../../lib/api/customer';
 
 import notify from '../../lib/notifier';
@@ -16,7 +16,7 @@ const styleBuyButton = {
 
 const dev = process.env.NODE_ENV !== 'production';
 const port = process.env.PORT || 8000;
-const ROOT_URL = `http://localhost:${port}`;
+const ROOT_URL = dev ? `http://localhost:${port}` : getRootUrl();
 
 const stripePromise = loadStripe(
   dev ? process.env.STRIPE_TEST_PUBLISHABLEKEY : process.env.STRIPE_LIVE_PUBLISHABLEKEY,

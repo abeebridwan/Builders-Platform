@@ -142,7 +142,7 @@ Check out [package.json](package.json).
 ## Run locally
 - Clone the project and run `yarn` to add packages.
 - Before you start the app, create a `.env` file at the app's root. This file must have values for some env variables specified below.
-  - To get `MONGO_URL_TEST`, we recommend a [free MongoDB at MongoDB Atlas](https://docs.mongodb.com/manual/tutorial/atlas-free-tier-setup/) (to be updated soon with MongoDB Atlas, see [issue](https://github.com/async-labs/builderbook/issues/138)).
+  - To get `MONGO_URL_TEST`, use [free MongoDB at MongoDB Atlas](https://docs.mongodb.com/manual/tutorial/atlas-free-tier-setup/).
   - Get `GOOGLE_CLIENTID` and `GOOGLE_CLIENTSECRET` by following [official OAuth tutorial](https://developers.google.com/identity/sign-in/web/sign-in#before_you_begin).
 
     Important: For Google OAuth app, callback URL is: http://localhost:8000/oauth2callback <br/>
