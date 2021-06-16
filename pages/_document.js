@@ -2,7 +2,7 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
-import { ServerStyleSheets } from '@material-ui/styles';
+// import { ServerStyleSheets } from '@material-ui/styles';
 
 class MyDocument extends Document {
   /* static getInitialProps = async (ctx) => {   Render app and page and get the context of the page with collected side effects.
@@ -114,8 +114,8 @@ class MyDocument extends Document {
   }
 }
 
-MyDocument.getInitialProps = async (ctx) => {
-  /* Resolution order
+/* MyDocument.getInitialProps = async (ctx) => {
+   Resolution order
 
   On the server:
   1. app.getInitialProps
@@ -137,7 +137,7 @@ MyDocument.getInitialProps = async (ctx) => {
   3. app.render
   4. page.render
  
-  Render app and page and get the context of the page with collected side effects. */
+  Render app and page and get the context of the page with collected side effects. 
   const sheets = new ServerStyleSheets();
   const originalRenderPage = ctx.renderPage;
 
@@ -159,5 +159,5 @@ MyDocument.getInitialProps = async (ctx) => {
     ),
   };
 };
-
+ */
 export default MyDocument;
