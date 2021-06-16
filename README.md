@@ -100,7 +100,7 @@ User roles, access, and pages are separated into admins, customers, and public
   - SEO friendly features included
   - many more - find out by checking the app by running it locally
 
-check it out  here: https://olumide025.github.io/Builders-Platform/
+check it out  here: https://mcbp.herokuapp.com
 
 ## Screenshots
 Chapter excerpt with Buy Button for Public/Guest visitor:<br><br>
@@ -223,7 +223,7 @@ Check out [package.json](package.json).
 ## Add a new book/content
 - Create a new Github repo (public or private).
 - In that repo, create an `introduction.md` file and write some content.
-- At the top of your `introduction.md` file, add metadata in the format shown below. See [this file](https://github.com/builderbook/demo-book/blob/master/introduction.md) as an example.
+- At the top of your `introduction.md` file, add metadata in the format shown below. See [this file](https://github.com/olumide025/demo-book/blob/master/introduction.md) as an example.
   
   ```
   ---
