@@ -1,15 +1,15 @@
 /* eslint-disable react/jsx-filename-extension */
 import CssBaseline from '@material-ui/core/CssBaseline';
-// import { ThemeProvider, StylesProvider } from '@material-ui/styles';
+import { ThemeProvider } from '@material-ui/styles';
 
 import App from 'next/app';
 import PropTypes from 'prop-types';
 import React from 'react';
-import Head from 'next/head';
+// import Head from 'next/head';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 
-// import { theme } from '../lib/theme';
+import { theme } from '../lib/theme';
 
 import Notifier from '../components/Notifier';
 import Header from '../components/Header';
@@ -26,10 +26,10 @@ const propTypes = {
 class MyApp extends App {
   componentDidMount() {
     // Remove the server-side injected CSS.
-    /* const jssStyles = document.querySelector('#jss-server-side');
+    const jssStyles = document.querySelector('#jss-server-side');
     if (jssStyles && jssStyles.parentNode) {
       jssStyles.parentNode.removeChild(jssStyles);
-    } */
+    }
   }
 
   render() {
@@ -39,15 +39,16 @@ class MyApp extends App {
     // console.log(pageProps.noHeader);
 
     return (
-      <>
-        <Head>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        {/* <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        </Head>
+        </Head> */}
         <CssBaseline />
         {pageProps.chapter ? null : <Header {...pageProps} />}
         <Component {...pageProps} />
         <Notifier />
-      </>
+      </ThemeProvider>
     );
   }
 }
