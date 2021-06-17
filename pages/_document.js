@@ -126,6 +126,7 @@ class MyDocument extends Document {
             minHeight: '100%',
           }}
         >
+          <script>0</script>
           <Main />
           <NextScript />
         </body>
