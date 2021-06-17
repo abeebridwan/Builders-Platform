@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-filename-extension */
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { ThemeProvider } from '@material-ui/styles';
+// import { ThemeProvider } from '@material-ui/styles';
 
 import App from 'next/app';
 import PropTypes from 'prop-types';
@@ -9,7 +9,7 @@ import Head from 'next/head';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 
-import { theme } from '../lib/theme';
+/* import { theme } from '../lib/theme'; */
 
 import Notifier from '../components/Notifier';
 import Header from '../components/Header';
@@ -43,12 +43,11 @@ class MyApp extends App {
         <Head>
           <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         </Head>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {pageProps.chapter ? null : <Header {...pageProps} />}
-          <Component {...pageProps} />
-          <Notifier />
-        </ThemeProvider>
+
+        <CssBaseline />
+        {pageProps.chapter ? null : <Header {...pageProps} />}
+        <Component {...pageProps} />
+        <Notifier />
       </>
     );
   }
