@@ -3,6 +3,7 @@
 import React from 'react';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
 import { ServerStyleSheets } from '@material-ui/styles';
+import { theme } from '../lib/theme';
 
 class MyDocument extends Document {
   static getInitialProps = async (ctx) => {
@@ -30,7 +31,7 @@ class MyDocument extends Document {
         <Head>
           <meta charSet="utf-8" />
           <meta name="google" content="notranslate" />
-
+          <meta name="theme-color" content={theme.palette.primary.main} />
           <link
             rel="shortcut icon"
             href="https://storage.googleapis.com/builderbook/favicon32.png"
