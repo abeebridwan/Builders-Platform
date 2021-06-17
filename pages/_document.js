@@ -5,7 +5,8 @@ import Document, { Head, Html, Main, NextScript } from 'next/document';
 import { ServerStyleSheets } from '@material-ui/styles';
 
 class MyDocument extends Document {
-  /* static getInitialProps = async (ctx) => {   Render app and page and get the context of the page with collected side effects.
+  static getInitialProps = async (ctx) => {
+    // Render app and page and get the context of the page with collected side effects.
     const sheets = new ServerStyleSheets();
     const originalRenderPage = ctx.renderPage;
 
@@ -18,10 +19,10 @@ class MyDocument extends Document {
 
     return {
       ...initialProps,
-   Styles fragment is rendered after the app and page rendering finish.
+      // Styles fragment is rendered after the app and page rendering finish.
       styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()],
     };
-  }; */
+  };
 
   render() {
     return (
@@ -29,7 +30,6 @@ class MyDocument extends Document {
         <Head>
           <meta charSet="utf-8" />
           <meta name="google" content="notranslate" />
-          {/*  <meta name="theme-color" content="#1976D2" />
 
           <link
             rel="shortcut icon"
@@ -44,7 +44,7 @@ class MyDocument extends Document {
             rel="stylesheet"
             href="https://storage.googleapis.com/builderbook/nprogress.min.css"
           />
-          <link rel="stylesheet" href="https://storage.googleapis.com/builderbook/vs.min.css" /> */}
+          <link rel="stylesheet" href="https://storage.googleapis.com/builderbook/vs.min.css" />
 
           <style>
             {`
@@ -106,6 +106,7 @@ class MyDocument extends Document {
             minHeight: '100%',
           }}
         >
+          <script>0</script>
           <Main />
           <NextScript />
         </body>
@@ -114,8 +115,8 @@ class MyDocument extends Document {
   }
 }
 
-MyDocument.getInitialProps = async (ctx) => {
-  /* Resolution order
+/* MyDocument.getInitialProps = async (ctx) => {
+   Resolution order
 
   On the server:
   1. app.getInitialProps
@@ -137,7 +138,7 @@ MyDocument.getInitialProps = async (ctx) => {
   3. app.render
   4. page.render
  
-  Render app and page and get the context of the page with collected side effects. */
+  Render app and page and get the context of the page with collected side effects. 
   const sheets = new ServerStyleSheets();
   const originalRenderPage = ctx.renderPage;
 
@@ -158,6 +159,6 @@ MyDocument.getInitialProps = async (ctx) => {
       </>
     ),
   };
-};
+}; */
 
 export default MyDocument;
