@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-filename-extension */
 import CssBaseline from '@material-ui/core/CssBaseline';
-// import { StylesProvider } from '@material-ui/styles';
+import { ThemeProvider, StylesProvider } from '@material-ui/core/styles';
 
 import App from 'next/app';
 import PropTypes from 'prop-types';
@@ -8,6 +8,8 @@ import React from 'react';
 import Head from 'next/head';
 import Router from 'next/router';
 import NProgress from 'nprogress';
+
+import { theme } from '../lib/theme';
 
 import Notifier from '../components/Notifier';
 import Header from '../components/Header';
@@ -22,13 +24,13 @@ const propTypes = {
 };
 
 class MyApp extends App {
-  /* componentDidMount() {
+  componentDidMount() {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side');
     if (jssStyles && jssStyles.parentNode) {
       jssStyles.parentNode.removeChild(jssStyles);
     }
-  } */
+  }
 
   render() {
     const { Component, pageProps } = this.props;
@@ -37,18 +39,19 @@ class MyApp extends App {
     // console.log(pageProps.noHeader);
 
     return (
-      <>
+      <ThemeProvider theme={theme}>
         {/* ThemeProvider makes the theme available down the React tree thanks to React context. */}
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-
-        <Head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        </Head>
-        <CssBaseline />
-        {pageProps.chapter ? null : <Header {...pageProps} />}
-        <Component {...pageProps} />
-        <Notifier />
-      </>
+        <StylesProvider injectFirst>
+          <Head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          </Head>
+          <CssBaseline />
+          {pageProps.chapter ? null : <Header {...pageProps} />}
+          <Component {...pageProps} />
+          <Notifier />
+        </StylesProvider>
+      </ThemeProvider>
     );
   }
 }

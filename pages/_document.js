@@ -2,12 +2,10 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
-import { ServerStyleSheets } from '@material-ui/styles';
-import { theme } from '../lib/theme';
+import { ServerStyleSheets } from '@material-ui/core/styles';
 
 class MyDocument extends Document {
-  static getInitialProps = async (ctx) => {
-    // Render app and page and get the context of the page with collected side effects.
+  /* static getInitialProps = async (ctx) => {
     const sheets = new ServerStyleSheets();
     const originalRenderPage = ctx.renderPage;
 
@@ -20,10 +18,34 @@ class MyDocument extends Document {
 
     return {
       ...initialProps,
-      // Styles fragment is rendered after the app and page rendering finish.
+
       styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()],
     };
-  };
+  }; */
+  static async getInitialProps(ctx) {
+    const sheet = new ServerStyleSheets();
+    const originalRenderPage = ctx.renderPage;
+
+    try {
+      ctx.renderPage = () =>
+        originalRenderPage({
+          enhanceApp: (App) => (props) => sheet.collectStyles(<App {...props} />),
+        });
+
+      const initialProps = await Document.getInitialProps(ctx);
+      return {
+        ...initialProps,
+        styles: (
+          <>
+            {initialProps.styles}
+            {sheet.getStyleElement()}
+          </>
+        ),
+      };
+    } finally {
+      sheet.seal();
+    }
+  }
 
   render() {
     return (
@@ -31,7 +53,7 @@ class MyDocument extends Document {
         <Head>
           <meta charSet="utf-8" />
           <meta name="google" content="notranslate" />
-          <meta name="theme-color" content={theme.palette.primary.main} />
+
           <link
             rel="shortcut icon"
             href="https://storage.googleapis.com/builderbook/favicon32.png"
@@ -114,51 +136,5 @@ class MyDocument extends Document {
     );
   }
 }
-
-/* MyDocument.getInitialProps = async (ctx) => {
-   Resolution order
-
-  On the server:
-  1. app.getInitialProps
-  2. page.getInitialProps
-  3. document.getInitialProps
-  4. app.render
-  5. page.render
-  6. document.render
-
-  On the server with error:
-  1. document.getInitialProps
-  2. app.render
-  3. page.render
-  4. document.render
-
-  On the client
-  1. app.getInitialProps
-  2. page.getInitialProps
-  3. app.render
-  4. page.render
- 
-  Render app and page and get the context of the page with collected side effects. 
-  const sheets = new ServerStyleSheets();
-  const originalRenderPage = ctx.renderPage;
-
-  ctx.renderPage = () =>
-    originalRenderPage({
-      enhanceApp: (App) => (props) => sheets.collect(<App {...props} />),
-    });
-
-  const initialProps = await Document.getInitialProps(ctx);
-
-  return {
-    ...initialProps,
-    // Styles fragment is rendered after the app and page rendering finish.
-    styles: (
-      <>
-        {initialProps.styles}
-        {sheets.getStyleElement()}
-      </>
-    ),
-  };
-}; */
 
 export default MyDocument;
