@@ -29,7 +29,7 @@ class MyDocument extends Document {
         <Head>
           <meta charSet="utf-8" />
           <meta name="google" content="notranslate" />
-          <meta name="theme-color" content="#1976D2" />
+          {/*  <meta name="theme-color" content="#1976D2" />
 
           <link
             rel="shortcut icon"
@@ -44,7 +44,7 @@ class MyDocument extends Document {
             rel="stylesheet"
             href="https://storage.googleapis.com/builderbook/nprogress.min.css"
           />
-          <link rel="stylesheet" href="https://storage.googleapis.com/builderbook/vs.min.css" />
+          <link rel="stylesheet" href="https://storage.googleapis.com/builderbook/vs.min.css" /> */}
 
           <style>
             {`
