@@ -24,13 +24,13 @@ const propTypes = {
 };
 
 class MyApp extends App {
-  componentDidMount() {
+  /* componentDidMount() {
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side');
     if (jssStyles) {
       jssStyles.parentElement.removeChild(jssStyles);
     }
-  }
+  } */
 
   render() {
     const { Component, pageProps } = this.props;

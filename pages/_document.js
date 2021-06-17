@@ -2,8 +2,8 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
 import Document, { Head, Html, Main, NextScript } from 'next/document';
-import { ServerStyleSheets } from '@material-ui/styles';
-import { theme } from '../lib/theme';
+// import { ServerStyleSheets } from '@material-ui/styles';
+import { SheetsRegistry, JssProvider, createGenerateId } from 'react-jss';
 
 class MyDocument extends Document {
   /* static getInitialProps = async (ctx) => {   Render app and page and get the context of the page with collected side effects.
@@ -24,13 +24,36 @@ class MyDocument extends Document {
     };
   }; */
 
+  static async getInitialProps(ctx) {
+    const registry = new SheetsRegistry();
+    const generateId = createGenerateId();
+    const originalRenderPage = ctx.renderPage;
+    ctx.renderPage = () =>
+      originalRenderPage({
+        enhanceApp: (App) => (props) => (
+          <JssProvider registry={registry} generateId={generateId}>
+            <App {...props} />
+          </JssProvider>
+        ),
+      });
+    const initialProps = await Document.getInitialProps(ctx);
+    return {
+      ...initialProps,
+      styles: (
+        <>
+          {initialProps.styles}
+          <style id="server-side-styles">{registry.toString()}</style>
+        </>
+      ),
+    };
+  }
+
   render() {
     return (
       <Html lang="en" style={{ height: '100%' }}>
         <Head>
           <meta charSet="utf-8" />
           <meta name="google" content="notranslate" />
-          <meta name="theme-color" content="#1976D2" />
 
           <link
             rel="shortcut icon"
@@ -95,8 +118,6 @@ class MyDocument extends Document {
             `,
             }}
           />
-          <meta name="theme-color" content={theme.palette.primary.main} />
-          {this.props.materialStyle}
         </Head>
         <body
           style={{
@@ -181,7 +202,7 @@ class MyDocument extends Document {
   };
 }; */
 
-MyDocument.getInitialProps = async (ctx) => {
+/* MyDocument.getInitialProps = async (ctx) => {
   const sheets = new ServerStyleSheets();
   const originalRenderPage = ctx.renderPage;
 
@@ -194,7 +215,8 @@ MyDocument.getInitialProps = async (ctx) => {
 
   return {
     ...initialProps,
-    materialStyle: sheets.getStyleElement(),
+    // Styles fragment is rendered after the app and page rendering finish.
+    styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()],
   };
-};
+}; */
 export default MyDocument;
